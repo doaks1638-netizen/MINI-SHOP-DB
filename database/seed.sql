@@ -17,17 +17,17 @@ INSERT INTO users (name, balance) VALUES
 ('Eva Green', 2200.75);
 
 -- Заполнение товаров (добавлен столбец now_amount)
-INSERT INTO products (category_id, name, title, now_amount) VALUES
-(1, 'iPhone 14',             'Смартфон Apple iPhone 14 128GB',              15),
-(1, 'Samsung TV 55"',        'Телевизор Samsung QLED 55 дюймов',             8),
-(1, 'AirPods Pro',           'Беспроводные наушники Apple AirPods Pro 2',   30),
-(2, 'Nike T-Shirt',          'Футболка Nike Dri-FIT размер M',               50),
-(2, 'Levi''s 501',           'Джинсы Levi''s 501 Original W32 L32',         20),
-(3, 'Organic Coffee',        'Кофе арабика молотый 500г',                   100),
-(3, 'Dark Chocolate',        'Шоколад горький 85% 100г',                    200),
-(4, 'Clean Code',            'Clean Code by Robert C. Martin',               12),
-(4, 'The Pragmatic Programmer', 'The Pragmatic Programmer by D. Thomas',    10),
-(5, 'Yoga Mat',              'Коврик для йоги 6мм нескользящий',             35);
+INSERT INTO products (category_id, name, title, price, now_amount) VALUES
+(1, 'iPhone 14',             'Смартфон Apple iPhone 14 128GB', 50000,15),
+(1, 'Samsung TV 55"',        'Телевизор Samsung QLED 55 дюймов',100000,8),
+(1, 'AirPods Pro',           'Беспроводные наушники Apple AirPods Pro 2',17000,30),
+(2, 'Nike T-Shirt',          'Футболка Nike Dri-FIT размер M',4000,50),
+(2, 'Levi''s 501',           'Джинсы Levi''s 501 Original W32 L32',3000,20),
+(3, 'Organic Coffee',        'Кофе арабика молотый 500г',999,100),
+(3, 'Dark Chocolate',        'Шоколад горький 85% 100г',689,200),
+(4, 'Clean Code',            'Clean Code by Robert C. Martin',159000,12),
+(4, 'The Pragmatic Programmer', 'The Pragmatic Programmer by D. Thomas',20,10),
+(5, 'Yoga Mat',              'Коврик для йоги 6мм нескользящий',14000,35);
 
 -- Заполнение заказов
 INSERT INTO orders (user_id, created_at, status) VALUES

@@ -23,8 +23,10 @@ create table products (
     category_id int references categories (id),
     name varchar(100) not null,
     title text not null,
-    now_amount numeric not null,
-    check (now_amount >= 0)
+    price numeric not null,
+    now_amount int not null,
+    check (now_amount >= 0),
+    check (price >= 0)
 );
 
 create index products_category_id on products (category_id);
