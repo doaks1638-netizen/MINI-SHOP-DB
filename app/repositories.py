@@ -49,7 +49,7 @@ class ProductRepository:
                 'p.id product_id, p.category_id,' \
                 'p.name product_name, p.title,' \
                 'p.price, p.now_amount, ' \
-                'c.id category_id, c.name category_name' \
+                'c.id category_id, c.name category_name ' \
                 'from products p join categories c on p.category_id = c.id')
             rez = cursor.fetchall()
         return rez
@@ -63,13 +63,13 @@ class ProductRepository:
                 'name, title,' \
                 'price, now_amount ' \
                 'from products' \
-                ' where id = %s' (id,))
+                ' where id = %s', (id,))
             else:
                 cursor.execute('select ' \
                 'p.id product_id, p.category_id,' \
                 'p.name product_name, p.title,' \
                 'p.price, p.now_amount, ' \
-                'c.id category_id, c.name category_name' \
+                'c.id category_id, c.name category_name ' \
                 'from products p join categories c on p.category_id = c.id ' \
                 'where p.id = %s', (id,))
             rez = cursor.fetchall()
@@ -80,7 +80,7 @@ class ProductRepository:
         flag = False
         try:
             with conn.cursor() as cursor:
-                cursor.execute('insert into products (category_id, name, title, now_amount) values (%s, %s, &s, %s)', (category_id, name, title, now_amount))
+                cursor.execute('insert into products (category_id, name, title, now_amount) values (%s, %s, %s, %s)', (category_id, name, title, now_amount))
                 flag = True
         except Exception as e:
             flag = False
@@ -124,7 +124,7 @@ class OrderRepository:
         with conn.cursor() as cursor:
             cursor.execute('select id, user_id, created_at, '
             'status from orders'
-            ' where id = %s', (id,))
+            ' where user_id = %s', (id,))
             rez = cursor.fetchall()
         return rez
 
@@ -136,5 +136,36 @@ class OrderRepository:
             'where order_id = %s', (order_id,))
             rez = cursor.fetchall()
         return rez
-
     
+    @staticmethod
+    def create_order(conn:Connection,user_id,**fields):
+        data = {'user_id':user_id}
+        if (rez := fields.get('created_at')) is not None:
+            data['created_at'] = rez
+        if (rez := fields.get('status')) is not None:
+            data['status'] = rez
+        fields = ', '.join(list(data))
+        values = list(data.values())
+        placeholders = ', '.join(['%s'] * len(values))
+
+        query = f'''
+        insert into orders ({fields}) values ({placeholders}) returning user_id
+        '''
+
+        with conn.cursor() as cursor: 
+            cursor.execute(query, values)
+            rez = cursor.fetchone().user_id
+
+        return rez
+        
+    @staticmethod
+    def add_order_products(conn:Connection, order_id:int, product_id:int, amount, first_price:int):
+        flag = False
+        try:
+            with conn.cursor() as cursor: 
+                cursor.execute('insert into order_items (order_id, product_id, amount, first_price) ' \
+                'values (%s, %s, %s, %s)', (order_id, product_id, amount, first_price))
+                flag = True
+        except Exception:
+            flag = False
+        return flag
