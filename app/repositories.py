@@ -4,7 +4,7 @@ from psycopg import Connection
 class BaseRepository:
 
     @staticmethod
-    def _base_query(conn:Connection, query: str, params: tuple) -> bool:
+    def _base_query(conn:Connection, query: str, params: tuple):
         with conn.cursor() as cursor:
             cursor.execute(query, params)
     
@@ -189,9 +189,16 @@ class CategoriesRepository:
         return BaseRepository._base_get_all(conn, 'select id, name from categories')
 
 class CartRepository:
+    
+    @staticmethod
+    def add_to_cart(conn:Connection, user_id, product_id, amount):
+        BaseRepository._base_query(conn, 'insert into cart (user_id,product_id,amount) values (%s, %s, %s) '
+        'on conflict (user_id, product_id) do update set cart.amount = cart.amount + excluded.amount', (user_id, product_id, amount))
 
     @staticmethod
-    def bucket_init(conn:Connection, user_id):
-        BaseRepository._base_query(conn, 'insert into cart (user_id) values (%s)', (user_id,))
+    def get_user_cart(conn:Connection, user_id):
+        return BaseRepository._base_get_by_id_all(conn, 'select user_id,product_id,amount from cart where user_id = %s', user_id)
     
-    
+    @staticmethod
+    def delete_from_cart(conn:Connection, user_id, product_id):
+        BaseRepository._base_query(conn, 'delete from cart where user_id = %s and product_id = %s', (user_id, product_id))

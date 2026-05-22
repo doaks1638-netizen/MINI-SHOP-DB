@@ -54,13 +54,8 @@ create table order_items(
 );
 
 create table cart(
-    id serial primary key,
-    user_id int references users (id) unique on delete cascade
-);
-
-create table cart_items(
-    cart_id int references cart (id) on delete cascade,
+    user_id int references users (id) unique on delete cascade,
     product_id int references products (id) on delete cascade,
     amount int,
-    primary key (cart_id, product_id)
+    primary key (user_id, product_id)
 );

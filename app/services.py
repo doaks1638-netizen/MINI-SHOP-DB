@@ -1,6 +1,6 @@
 # вся логика приложения (тут все транзакции и проверки) БЕЗ sql!
 # прописать подключение через namedtuple
-from repositories import UserRepository, ProductRepository, OrderRepository, CategoriesRepository
+from repositories import UserRepository, ProductRepository, OrderRepository, CategoriesRepository, CartRepository
 from db import get_connect
 
 # юзеры
@@ -56,17 +56,17 @@ def delete_product(id):
     except Exception:
         raise ValueError('Не удалось удалось удалить пользователя!')
         
-def update_product_price(id, new_price):
+def plus_product_price(id, new_price):
     try:
         with get_connect() as conn:
-            ProductRepository.update_price(conn, id, new_price)
+            ProductRepository.plus_price(conn, id, new_price)
     except Exception:
         raise ValueError('Обновление цены не произошло! Проверите id или корекность цены (>0)')
 
-def update_product_amount(id, new_am):
+def plus_product_amount(id, new_am):
     try:
         with get_connect() as conn:
-            ProductRepository.update_amount(conn, id, new_am)
+            ProductRepository.plus_amount(conn, id, new_am)
     except Exception:
         raise ValueError('Обновление цены не произошло! Проверите id или корекность количетства (>0)')
 
@@ -85,17 +85,6 @@ def get_all_categories():
     return rez
 
 # заказы 
-'''
-- создание заказа и наполнение его (при нажатии купить сейчас) - done
-- создание заказа и выполнение его (при выборке из корзины) + автоматическое удаление из корзины
-- попопление корзины ipsert
-- просмотр всех заказов
-- просмотр активвных заказов / доставленных
-- поменять статус заказа
-- при добавлении товара списать его количество и проверить баланс пользователя
-- обновить статус заказа
-'''
-
 
 def buy_product_now(user_id, product_id, amount):
     if amount < 1:
@@ -109,7 +98,11 @@ def buy_product_now(user_id, product_id, amount):
                     raise ValueError('Данного товара не существует!')
             
             price_now, product_amount = product.price, product.now_amount
-            user_balance = UserRepository.get_by_id(conn, user_id, for_update=True).balance
+            user = UserRepository.get_by_id(conn, user_id, for_update=True)
+            if user is None:
+                raise ValueError('Данного пользователя не существует!')
+
+            user_balance = user.balance
 
             if product_amount < amount:
                 raise ValueError(f'Недостаточно товара в магазине! Всего осталось {product_amount}')
@@ -134,7 +127,10 @@ def create_full_order(user_id, products:dict):
 
     try:
         with get_connect() as conn:
-            user_balance = UserRepository.get_by_id(conn, user_id, for_update=True).balance
+            user = UserRepository.get_by_id(conn, user_id, for_update=True)
+            if user is None:
+                raise ValueError('Данного пользователя не существует!')
+            user_balance = user.balance
             order_id = OrderRepository.create_order(conn, user_id).id
 
             total_sum = 0
@@ -159,7 +155,8 @@ def create_full_order(user_id, products:dict):
                     raise ValueError('Недостаточно денег на балансе!')
 
                 ProductRepository.plus_amount(conn, product_id, -amount)
-                OrderRepository.add_order_products(conn, order_id, product_id, amount, price_now) 
+                OrderRepository.add_order_products(conn, order_id, product_id, amount, price_now)
+                CartRepository.delete_from_cart(conn, user_id, product_id)
              
             UserRepository.plus_balance(conn, user_id, -total_sum)       
                 
@@ -168,3 +165,58 @@ def create_full_order(user_id, products:dict):
     except Exception:
         raise ValueError('Произошла ошибка! Повторить позже..')
 
+def show_all_orders():
+    with get_connect() as conn:
+        rez = OrderRepository.get_all_orders(conn)
+    return rez
+
+def show_user_orders(user_id):
+    with get_connect() as conn:
+        rez = OrderRepository.get_by_user_id(conn, user_id)
+    return rez
+
+def show_user_active_orders(user_id):
+    with get_connect() as conn:
+        rez = OrderRepository.get_active_orders(conn, user_id)
+    return rez
+
+def show_user_delivered_orders(user_id):
+    with get_connect() as conn:
+        rez = OrderRepository.delivered_orders(conn, user_id)
+    return rez
+
+def change_order_status(order_id, status):
+    if status not in ['created', 'prepared', 'finish', 'delivery', 'delivered']:
+        raise ValueError('Некоректное значение статуса')
+    try:
+        with get_connect() as conn:
+            OrderRepository.change_order_status(conn,order_id, status)
+    except Exception:
+        raise ValueError('Не удалось изменить статус') 
+        
+
+# корзина
+    
+def show_all_cart_id(user_id):
+    with get_connect() as conn:
+        rez = CartRepository.get_user_cart(conn, user_id)
+    return rez
+    
+def delete_from_cart(user_id, product_id):
+    with get_connect() as conn:
+        return CartRepository.delete_from_cart(conn, user_id, product_id)
+    
+def add_to_cart(user_id, product_id, amount):
+    if amount < 1:
+        raise ValueError('Количество товара должно быть больше 0')
+
+    with get_connect() as conn:
+        user = UserRepository.get_by_id(conn, user_id)
+        if user is None:
+            raise ValueError('Данного пользователя не существует!')
+
+        product = ProductRepository.get_by_id(conn, product_id)
+        if product is None:
+            raise ValueError('Данного товара не существует!')
+
+        return CartRepository.add_to_cart(conn, user_id, product_id, amount)
