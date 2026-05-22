@@ -37,7 +37,7 @@ create table orders (
     user_id int references users(id),
     created_at timestamp default current_timestamp,
     status varchar(50) default 'created',
-    check (status in ('created', 'prepared', 'finish', 'delivery'))
+    check (status in ('created', 'prepared', 'finish', 'delivery', 'delivered'))
 );
 
 create index orders_user_id_index on orders (user_id);

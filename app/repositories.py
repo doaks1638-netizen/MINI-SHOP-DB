@@ -4,15 +4,9 @@ from psycopg import Connection
 class BaseRepository:
 
     @staticmethod
-    def _base_except_write(conn:Connection, query: str, params: tuple) -> bool:
-        flag = False
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute(query, params)
-                flag = True
-        except Exception as e:
-            flag = False
-        return flag
+    def _base_query(conn:Connection, query: str, params: tuple) -> bool:
+        with conn.cursor() as cursor:
+            cursor.execute(query, params)
     
     @staticmethod
     def _base_get_all(conn:Connection, query):
@@ -22,10 +16,22 @@ class BaseRepository:
         return rez
     
     @staticmethod
-    def _base_get_by_id(conn:Connection, query, id):
+    def _base_get_by_id(conn:Connection, query, id, for_update = False, update_query = None):
+        with conn.cursor() as cursor:
+            if not for_update:
+                cursor.execute(query, (id,))
+                rez = cursor.fetchone()
+            else:
+                if update_query is not None:
+                    cursor.execute(update_query, (id,))
+                    rez = cursor.fetchone()  
+        return rez
+    
+    @staticmethod
+    def _base_get_by_id_all(conn:Connection, query, id):
         with conn.cursor() as cursor:
             cursor.execute(query, (id,))
-            rez = cursor.fetchone()
+            rez = cursor.fetchall()
         return rez
     
 
@@ -42,11 +48,11 @@ class UserRepository:
     
     @staticmethod
     def add_new(conn:Connection, name:str):
-        return BaseRepository._base_except_write(conn, 'insert into users (name) values (%s)', (name,))
+        BaseRepository._base_query(conn, 'insert into users (name) values (%s)', (name,))
 
     @staticmethod
     def delete_user(conn:Connection, id:int):
-        return BaseRepository._base_except_write(conn, 'delete from users where id = %s', (id,))
+        BaseRepository._base_query(conn, 'delete from users where id = %s', (id,))
 
 
 class ProductRepository:
@@ -69,7 +75,7 @@ class ProductRepository:
 
     @staticmethod
     def add_new(conn:Connection, category_id, name, title, now_amount):
-        return BaseRepository._base_except_write(
+        BaseRepository._base_query(
             conn,
             'insert into products (category_id, name, title, now_amount) values (%s, %s, %s, %s)',
             (category_id, name, title, now_amount)
@@ -77,7 +83,7 @@ class ProductRepository:
     
     @staticmethod
     def delete_product(conn:Connection, id):
-        return BaseRepository._base_except_write(
+        BaseRepository._base_query(
             conn,
             'delete from products where id = %s',
             (id,)
@@ -85,7 +91,7 @@ class ProductRepository:
     
     @staticmethod
     def update_amount(conn:Connection, id, new_amount):
-        return BaseRepository._base_except_write(
+        BaseRepository._base_query(
             conn,
             'update products set now_amount = now_amount + %s where id = %s',
             (new_amount, id)
@@ -93,7 +99,7 @@ class ProductRepository:
 
     @staticmethod
     def update_price(conn:Connection, id, new_price): 
-        return BaseRepository._base_except_write(
+        BaseRepository._base_query(
             conn,
             'update products set price = price + %s where id = %s',
             (new_price, id)
@@ -112,7 +118,7 @@ class OrderRepository:
 
     @staticmethod
     def get_by_user_id(conn:Connection, id:int):
-        return BaseRepository._base_get_by_id(
+        return BaseRepository._base_get_by_id_all(
             conn,
             'select id, user_id, created_at, status from orders where user_id = %s',
             id
@@ -120,34 +126,43 @@ class OrderRepository:
 
     @staticmethod
     def get_order_check(conn:Connection, order_id:int):
-        return BaseRepository._base_get_by_id(
+        return BaseRepository._base_get_by_id_all(
             conn,
             'select order_id, product_id, amount, first_price from order_items where order_id = %s',
             order_id
         )
     
     @staticmethod
-    def create_order(conn:Connection, user_id, **fields):
-        data = {'user_id': user_id}
-        if (rez := fields.get('created_at')) is not None:
-            data['created_at'] = rez
-        if (rez := fields.get('status')) is not None:
-            data['status'] = rez
-        cols = ', '.join(list(data))
-        values = list(data.values())
-        placeholders = ', '.join(['%s'] * len(values))
-
-        query = f'insert into orders ({cols}) values ({placeholders}) returning user_id'
-
-        with conn.cursor() as cursor: 
-            cursor.execute(query, values)
-            rez = cursor.fetchone().user_id
-
-        return rez
+    def get_active_orders(conn:Connection, user_id):
+        return BaseRepository._base_get_by_id_all(
+            conn,
+            '''
+            select id, user_id, created_at, status from orders where user_id = %s and status in ('prepared', 'finish', 'delivery')
+            ''',
+            user_id
+        )
+    
+    @staticmethod
+    def delivered_orders(conn:Connection, user_id):
+        return BaseRepository._base_get_by_id_all(
+            conn,
+            '''
+            select id, user_id, created_at, status from orders where user_id = %s and status = 'delivered'
+            ''',
+            user_id
+        )
+    
+    @staticmethod
+    def create_order(conn:Connection, user_id):
+        BaseRepository._base_query(conn, 'insert into orders (user_id) values (%s) returning id', (user_id,))
+    
+    @staticmethod
+    def change_order_status(conn:Connection, order_id, status):
+        BaseRepository._base_query(conn, 'update orders set status = %s where id = %s', (status, order_id))
         
     @staticmethod
     def add_order_products(conn:Connection, order_id:int, product_id:int, amount, first_price:int):
-        return BaseRepository._base_except_write(
+        BaseRepository._base_query(
             conn,
             'insert into order_items (order_id, product_id, amount, first_price) values (%s, %s, %s, %s)',
             (order_id, product_id, amount, first_price)
@@ -157,10 +172,16 @@ class CategoriesRepository:
 
     @staticmethod
     def create_repository(conn:Connection, name):
-        return BaseRepository._base_except_write(conn, 'insert into categories (name) values (%s)', (name,))
+        BaseRepository._base_query(conn, 'insert into categories (name) values (%s)', (name,))
     
     @staticmethod
     def get_all_repository(conn:Connection, name):
-        return BaseRepository._base_get_all(conn, 'select id, name from categories')
+        BaseRepository._base_get_all(conn, 'select id, name from categories')
+
+class CartRepository:
+
+    @staticmethod
+    def bucket_init(conn:Connection, user_id):
+        BaseRepository._base_query(conn, 'insert into cart (user_id) values (%s)', (user_id,))
     
     
