@@ -22,7 +22,9 @@ class BaseRepository:
                 cursor.execute(query, (id,))
                 rez = cursor.fetchone()
             else:
-                if update_query is not None:
+                if update_query is None:
+                    raise ValueError('Нужен SQL запрос для UPDATE')
+                else:
                     cursor.execute(update_query, (id,))
                     rez = cursor.fetchone()  
         return rez
@@ -43,8 +45,9 @@ class UserRepository:
         return BaseRepository._base_get_all(conn, 'select id, name, balance from users')
      
     @staticmethod
-    def get_by_id(conn:Connection, id:int):
-        return BaseRepository._base_get_by_id(conn, 'select id, name, balance from users where id = %s', id)
+    def get_by_id(conn:Connection, id:int, for_update = False):
+        return BaseRepository._base_get_by_id(conn, 'select id, name, balance from users where id = %s', id, for_update, 
+                                              'select id, name, balance from users where id = %s for update')
     
     @staticmethod
     def add_new(conn:Connection, name:str):
@@ -53,6 +56,10 @@ class UserRepository:
     @staticmethod
     def delete_user(conn:Connection, id:int):
         BaseRepository._base_query(conn, 'delete from users where id = %s', (id,))
+
+    @staticmethod
+    def plus_balance(conn:Connection, id:int, sum_to_update):
+        BaseRepository._base_query(conn, 'update users set balance = balance + %s where id = %s', (sum_to_update,id))
 
 
 class ProductRepository:
@@ -66,11 +73,11 @@ class ProductRepository:
         )
     
     @staticmethod
-    def get_by_id(conn:Connection, id:int):
+    def get_by_id(conn:Connection, id:int, for_update = False):
         return BaseRepository._base_get_by_id(
             conn,
             'select id, category_id, name, title, price, now_amount from products where id = %s',
-            id
+            id, for_update, 'select id, category_id, name, title, price, now_amount from products where id = %s for update'
         )
 
     @staticmethod
@@ -90,7 +97,7 @@ class ProductRepository:
         )
     
     @staticmethod
-    def update_amount(conn:Connection, id, new_amount):
+    def plus_amount(conn:Connection, id, new_amount):
         BaseRepository._base_query(
             conn,
             'update products set now_amount = now_amount + %s where id = %s',
@@ -98,7 +105,7 @@ class ProductRepository:
         )
 
     @staticmethod
-    def update_price(conn:Connection, id, new_price): 
+    def plus_price(conn:Connection, id, new_price): 
         BaseRepository._base_query(
             conn,
             'update products set price = price + %s where id = %s',
@@ -154,7 +161,10 @@ class OrderRepository:
     
     @staticmethod
     def create_order(conn:Connection, user_id):
-        BaseRepository._base_query(conn, 'insert into orders (user_id) values (%s) returning id', (user_id,))
+        with conn.cursor() as cursor:
+            cursor.execute('insert into orders (user_id) values (%s) returning id', (user_id,))
+            rez = cursor.fetchone()
+        return rez
     
     @staticmethod
     def change_order_status(conn:Connection, order_id, status):
@@ -175,8 +185,8 @@ class CategoriesRepository:
         BaseRepository._base_query(conn, 'insert into categories (name) values (%s)', (name,))
     
     @staticmethod
-    def get_all_repository(conn:Connection, name):
-        BaseRepository._base_get_all(conn, 'select id, name from categories')
+    def get_all_repository(conn:Connection):
+        return BaseRepository._base_get_all(conn, 'select id, name from categories')
 
 class CartRepository:
 
