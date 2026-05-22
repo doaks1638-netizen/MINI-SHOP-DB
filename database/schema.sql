@@ -44,11 +44,23 @@ create index orders_user_id_index on orders (user_id);
 
 -- таблица связи many-to-many между товарами и заказами
 create table order_items(
-    order_id int not null references orders (id),
-    product_id int not null references products (id),
+    order_id int not null references orders (id) on delete cascade,
+    product_id int not null references products (id) on delete cascade,
     amount int not null,
     first_price numeric not null,
     primary key (order_id, product_id),
     check (amount > 0),
     check (first_price >= 0)
+);
+
+create table cart(
+    id serial primary key,
+    user_id int references users (id) unique on delete cascade
+);
+
+create table cart_items(
+    cart_id int references cart (id) on delete cascade,
+    product_id int references products (id) on delete cascade,
+    amount int,
+    primary key (cart_id, product_id)
 );
