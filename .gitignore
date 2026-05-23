@@ -1,3 +1,4 @@
 *.env
 test.md
 *__pycache__
+.venv/
