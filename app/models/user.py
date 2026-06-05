@@ -16,7 +16,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(100))
     balance: Mapped[Decimal] = mapped_column(Numeric(10, 2), server_default=text("0"))
 
-    cart_items: Mapped[list[CartItem]] = relationship(
+    cart_items: Mapped[list["CartItem"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
         passive_deletes=True,

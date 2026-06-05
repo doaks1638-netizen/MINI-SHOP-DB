@@ -11,4 +11,5 @@ dependencies = [
     "asyncpg>=0.31.0",
     "sqlalchemy>=2.0.50",
     "alembic>=1.18.4",
+    "ruff>=0.15.16",
 ]
