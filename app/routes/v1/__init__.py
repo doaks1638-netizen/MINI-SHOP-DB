@@ -1,3 +1,1 @@
-from fastapi import APIRouter
-
-v1_router = APIRouter(prefix="/api/v1")
+from .cart_item import cart_router
