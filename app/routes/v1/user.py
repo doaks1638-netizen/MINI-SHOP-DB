@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from app.database import DBsession
 from app.routes.dependencies import page_number
 from app.schemas import UserRelCount, UserPatch, UserDTO, OrderDTO, UserCreate

@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Query, Body, Depends, HTTPException
-from sqlalchemy import select, func, and_, update, delete
+from fastapi import APIRouter, Body, Depends
+from sqlalchemy import select, func
 from sqlalchemy.dialects.postgresql import insert
 from app.models.cart_item import CartItem
-from app.models.product import Product
 from app.schemas import Cart, CartItemDTO
 from app.database import DBsession
 from app.services import check_user_product_exists, update_amount

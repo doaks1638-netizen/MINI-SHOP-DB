@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body
 from sqlalchemy import select, insert
 from sqlalchemy.orm import selectinload
 from app.database import DBsession

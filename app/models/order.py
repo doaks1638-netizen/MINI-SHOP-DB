@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 from decimal import Decimal
 
 if TYPE_CHECKING:
-    from app.models.user import User
     from app.models.order_item import OrderItem
 
 
@@ -25,5 +24,4 @@ class Order(Base):
     )
     total_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
 
-    user: Mapped["User"] = relationship(back_populates="orders")
     items: Mapped[list["OrderItem"]] = relationship(back_populates="order")

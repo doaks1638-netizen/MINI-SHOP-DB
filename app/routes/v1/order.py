@@ -1,16 +1,14 @@
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, HTTPException
 from app.database import DBsession
-from sqlalchemy import select, insert, update, delete
+from sqlalchemy import select, insert, update
 from sqlalchemy.orm import selectinload
 from app.models.order import Order
 from app.models.user import User
 from app.models.product import Product
 from app.models.order_item import OrderItem
 from app.services import update_amount, debit_funds
-from typing import Annotated
 from app.schemas import OrderDTO, OrderCreateRequest, OrderStatusEdit
 from uuid import UUID
-from decimal import Decimal
 from app.routes.dependencies import page_number
 
 order_router = APIRouter(tags=["orders"])

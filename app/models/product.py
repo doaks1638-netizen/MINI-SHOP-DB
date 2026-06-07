@@ -7,9 +7,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.models.cart_item import CartItem
     from app.models.categories import Category
-    from app.models.order_item import OrderItem
 
 
 class Product(Base):
@@ -24,13 +22,7 @@ class Product(Base):
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     now_amount: Mapped[int]
 
-    cart_items: Mapped[list["CartItem"]] = relationship(
-        back_populates="product",
-        cascade="all, delete-orphan",
-        passive_deletes=True,
-    )
     category: Mapped["Category"] = relationship(back_populates="products")
-    items: Mapped[list["OrderItem"]] = relationship(back_populates="product")
 
     __table_args__ = (
         CheckConstraint("now_amount >= 0", name="product_amount_positive"),

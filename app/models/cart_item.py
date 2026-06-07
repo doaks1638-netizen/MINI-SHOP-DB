@@ -1,13 +1,8 @@
 from app.models import Base
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey
 from sqlalchemy import CheckConstraint, PrimaryKeyConstraint
 from uuid import UUID
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from app.models.user import User
-    from app.models.product import Product
 
 
 class CartItem(Base):
@@ -18,9 +13,6 @@ class CartItem(Base):
         ForeignKey("products.id", ondelete="CASCADE")
     )
     amount: Mapped[int]
-
-    user: Mapped["User"] = relationship(back_populates="cart_items")
-    product: Mapped["Product"] = relationship(back_populates="cart_items")
 
     __table_args__ = (
         PrimaryKeyConstraint("user_id", "product_id", name="cart_user_product_pk"),

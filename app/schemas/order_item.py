@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 from uuid import UUID
 from decimal import Decimal
-from app.schemas.shared import OrderShare, ProductShare
 from typing import Annotated
 
 
@@ -13,11 +12,6 @@ class OrderItemCreate(BaseModel):
 class OrderItemDTO(OrderItemCreate):
     order_id: UUID
     price_for_one: Annotated[Decimal, Field(ge=0)]
-
-
-class OrderItemRelDTO(OrderItemDTO):
-    order: OrderShare
-    product: ProductShare
 
 
 class OrderCreateRequest(BaseModel):
