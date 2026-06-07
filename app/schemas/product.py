@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Annotated
-from uuid6 import UUID
+from uuid import UUID
 from decimal import Decimal
 from app.schemas.shared import CartItemShare, CategoryShare
 

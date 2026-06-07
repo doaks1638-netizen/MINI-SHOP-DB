@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from decimal import Decimal
 from app.schemas.shared import CartItemShare, OrderShare
 from typing import Annotated
-from uuid6 import UUID
+from uuid import UUID
 
 
 class UserCreate(BaseModel):

@@ -7,7 +7,7 @@ from app.schemas import Cart, CartItemDTO
 from app.database import DBsession
 from app.services import check_user_product_exists, update_amount
 from typing import Annotated
-from uuid6 import UUID
+from uuid import UUID
 
 cart_router = APIRouter(tags=["CART"])
 

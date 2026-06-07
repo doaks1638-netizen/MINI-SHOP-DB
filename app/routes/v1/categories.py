@@ -5,7 +5,7 @@ from app.database import DBsession
 from app.schemas import CategoryDTO, CategoryCreate, CategoryRelDTO
 from app.models.categories import Category
 from typing import Annotated
-from uuid6 import UUID
+from uuid import UUID
 
 category_router = APIRouter(tags=['CATEGORIES'])
 

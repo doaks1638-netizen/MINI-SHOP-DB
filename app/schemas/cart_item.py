@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from uuid6 import UUID
+from uuid import UUID
 from typing import Annotated
 
 

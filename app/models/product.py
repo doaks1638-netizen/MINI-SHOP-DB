@@ -2,7 +2,7 @@ from app.models import Base, idpk
 from sqlalchemy.types import String, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, CheckConstraint
-from uuid6 import UUID as UUID7
+from uuid import UUID
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
@@ -16,7 +16,7 @@ class Product(Base):
     __tablename__ = "products"
 
     id: Mapped[idpk]
-    category_id: Mapped[UUID7] = mapped_column(
+    category_id: Mapped[UUID] = mapped_column(
         ForeignKey("categories.id", ondelete="CASCADE")
     )
     name: Mapped[str] = mapped_column(String(100))

@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel, ConfigDict, Field
 from decimal import Decimal
-from uuid6 import UUID
+from uuid import UUID
 from typing import Annotated
 from datetime import datetime
 from app.models import OrderStatus

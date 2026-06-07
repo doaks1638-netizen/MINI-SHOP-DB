@@ -9,7 +9,7 @@ from app.models.order_item import OrderItem
 from app.services import update_amount, debit_funds
 from typing import Annotated
 from app.schemas import OrderDTO, OrderCreateRequest, OrderStatusEdit
-from uuid6 import UUID
+from uuid import UUID
 from decimal import Decimal
 
 order_router = APIRouter(tags="orders")

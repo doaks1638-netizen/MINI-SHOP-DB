@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, text
 from sqlalchemy.types import Enum, Numeric
 from datetime import datetime
-from uuid6 import UUID as UUID7
+from uuid import UUID
 from typing import TYPE_CHECKING
 from decimal import Decimal
 
@@ -16,7 +16,7 @@ class Order(Base):
     __tablename__ = "orders"
 
     id: Mapped[idpk]
-    user_id: Mapped[UUID7] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     created_at: Mapped[datetime] = mapped_column(
         server_default=text("CURRENT_TIMESTAMP")
     )

@@ -3,7 +3,7 @@ from decimal import Decimal
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, PrimaryKeyConstraint, CheckConstraint
 from sqlalchemy.types import Numeric
-from uuid6 import UUID as UUID7
+from uuid import UUID
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -14,8 +14,8 @@ if TYPE_CHECKING:
 class OrderItem(Base):
     __tablename__ = "order_items"
 
-    order_id: Mapped[UUID7] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"))
-    product_id: Mapped[UUID7] = mapped_column(
+    order_id: Mapped[UUID] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"))
+    product_id: Mapped[UUID] = mapped_column(
         ForeignKey("products.id", ondelete="RESTRICT")
     )
     amount: Mapped[int]

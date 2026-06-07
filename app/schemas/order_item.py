@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from uuid6 import UUID
+from uuid import UUID
 from decimal import Decimal
 from app.schemas.shared import OrderShare, ProductShare
 from typing import Annotated

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from uuid6 import UUID
+from uuid import UUID
 from app.models.order_status_enum import OrderStatus
 from datetime import datetime
 from decimal import Decimal
