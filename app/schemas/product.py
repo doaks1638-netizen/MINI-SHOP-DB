@@ -2,12 +2,13 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Annotated
 from uuid import UUID
 from decimal import Decimal
-from app.schemas.shared import CartItemShare, CategoryShare
+from app.schemas.shared import CategoryShare
 
 
 class ProductCreate(BaseModel):
     category_id: UUID
     name: Annotated[str, Field(max_length=100)]
+    description: Annotated[str, Field(max_length=2000, default=None)]
     price: Annotated[Decimal, Field(ge=0)]
     now_amount: Annotated[int, Field(ge=0)]
 
@@ -18,5 +19,12 @@ class ProductDTO(ProductCreate):
 
 
 class ProductRelDTO(ProductDTO):
-    cart_items: list[CartItemShare] = []
     category: CategoryShare
+
+
+class ProductPatch(BaseModel):
+    category_id: UUID | None = None
+    name: Annotated[str | None, Field(max_length=100)] = None
+    description: Annotated[str | None, Field(max_length=2000)] = None
+    price: Annotated[Decimal | None, Field(ge=0)] = None
+    now_amount: Annotated[int | None, Field(ge=0)] = None

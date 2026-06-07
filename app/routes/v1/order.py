@@ -11,10 +11,9 @@ from typing import Annotated
 from app.schemas import OrderDTO, OrderCreateRequest, OrderStatusEdit
 from uuid import UUID
 from decimal import Decimal
+from app.routes.dependencies import page_number
 
-order_router = APIRouter(tags="orders")
-
-page_number = Annotated[int, Query(gt=0)]
+order_router = APIRouter(tags=["orders"])
 
 
 @order_router.get("/orders", response_model=list[OrderDTO])
@@ -112,6 +111,6 @@ async def delete_order(db: DBsession, order_id: UUID):
         raise HTTPException(status_code=404, detail="Order not found")
     for order_item in order.items:
         await update_amount(db, order_item.product_id, order_item.amount)
-    await db.delete(order)
+    db.delete(order)
     await debit_funds(db, order.user_id, order.total_price)
     await db.commit()

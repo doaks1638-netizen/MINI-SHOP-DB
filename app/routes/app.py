@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes.v1.router import v1_router
+from app.routes.v1 import v1_router
 
 app = FastAPI(title="MINI-SHOP-DB")
 

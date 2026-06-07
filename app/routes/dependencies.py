@@ -1,5 +1,8 @@
 # auntification function for future
-from fastapi import Depends
+from fastapi import Depends, Query
+from typing import Annotated
+
+page_number = Annotated[int, Query(gt=0)]
 
 async def get_current_user():
     # just return user (jwt)

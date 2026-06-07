@@ -1,7 +1,7 @@
 from app.models import Base, idpk
 from sqlalchemy.types import String, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, CheckConstraint
+from sqlalchemy import ForeignKey, CheckConstraint, UniqueConstraint
 from uuid import UUID
 from decimal import Decimal
 from typing import TYPE_CHECKING
@@ -20,7 +20,7 @@ class Product(Base):
         ForeignKey("categories.id", ondelete="CASCADE")
     )
     name: Mapped[str] = mapped_column(String(100))
-    description: Mapped[str]
+    description: Mapped[str] = mapped_column(String(200), nullable=True)
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     now_amount: Mapped[int]
 
@@ -35,4 +35,5 @@ class Product(Base):
     __table_args__ = (
         CheckConstraint("now_amount >= 0", name="product_amount_positive"),
         CheckConstraint("price >= 0", name="product_price_positive"),
+        UniqueConstraint("category_id", "name"),
     )

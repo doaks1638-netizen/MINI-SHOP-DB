@@ -8,10 +8,9 @@ from app.database import DBsession
 from app.services import check_user_product_exists, update_amount
 from typing import Annotated
 from uuid import UUID
+from app.routes.dependencies import page_number
 
 cart_router = APIRouter(tags=["CART"])
-
-page_number = Annotated[int, Query(gt=0)]
 
 
 @cart_router.get("/cart", response_model=list[Cart])
@@ -72,7 +71,7 @@ async def change_product_amount(
     diff = new_amount - old_amount
     await update_amount(db, product_id, -diff)
 
-    cart_item.amount  = new_amount
+    cart_item.amount = new_amount
 
     await db.commit()
 
