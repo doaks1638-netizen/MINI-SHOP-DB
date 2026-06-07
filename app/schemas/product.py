@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Annotated
 from uuid import UUID
 from decimal import Decimal
-from app.schemas.shared import CategoryShare
+from app.schemas.categories import CategoryDTO
 
 
 class ProductCreate(BaseModel):
@@ -19,7 +19,7 @@ class ProductDTO(ProductCreate):
 
 
 class ProductRelDTO(ProductDTO):
-    category: CategoryShare
+    category: CategoryDTO
 
 
 class ProductPatch(BaseModel):
