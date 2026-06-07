@@ -9,6 +9,14 @@ from alembic import context
 
 from app.settings import settings
 from app.models import Base
+
+from app.models.user import User
+from app.models.product import Product
+from app.models.cart_item import CartItem
+from app.models.order import Order
+from app.models.order_item import OrderItem
+from app.models.categories import Category
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

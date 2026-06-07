@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from uuid import UUID
+from uuid6 import UUID
 from app.schemas.shared import UserShare
 from app.models.order_status_enum import OrderStatus
 from datetime import datetime

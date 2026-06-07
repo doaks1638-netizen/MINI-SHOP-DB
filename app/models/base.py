@@ -1,13 +1,15 @@
 from sqlalchemy.orm import DeclarativeBase, mapped_column
 from typing import Annotated
-from uuid import UUID
-from sqlalchemy import text
+from uuid6 import UUID as UUID7, uuid7
+from sqlalchemy import text, UUID as UUID_sql
 
 
 class Base(DeclarativeBase):
-    pass
+    type_annotation_map = {
+        UUID7: UUID_sql
+    }
 
 
 idpk = Annotated[
-    UUID, mapped_column(primary_key=True, server_default=text("gen_random_uuid()"))
+    UUID7, mapped_column(primary_key=True,default=uuid7, server_default=text('uuidv7()'))
 ]

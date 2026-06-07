@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from uuid import UUID
+from uuid6 import UUID
 from typing import Annotated
 from app.schemas.shared import ProductShare
 

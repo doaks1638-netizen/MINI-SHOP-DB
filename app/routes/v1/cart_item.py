@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Query
-from sqlalchemy import select, func
+from fastapi import APIRouter, Query, Body, Depends
+from sqlalchemy import select, func, and_, update, delete
+from sqlalchemy.dialects.postgresql import insert
 from app.models import CartItem
 from app.schemas import Cart, CartItemDTO
 from app.database import DBsession
+from app.services import check_user_product_exists
 from typing import Annotated
-from uuid import UUID
+from uuid6 import UUID
 
-cart_router = APIRouter()
+cart_router = APIRouter(tags=['CART'])
 
 page_number = Annotated[int, Query(gt=0)]
 
@@ -38,3 +40,49 @@ async def get_user_cart(db: DBsession, page: page_number, user_id: UUID):
     )
     rez = await db.execute(query)
     return [CartItemDTO.model_validate(x) for x in rez.scalars().all()]
+
+
+@cart_router.post("/cart", status_code=201)
+async def create_new_cart(db: DBsession, item: CartItemDTO):
+    stmt = insert(CartItem).values(**item.model_dump())
+    stmt = stmt.on_conflict_do_update(
+        constraint="cart_user_product_pk",
+        set_=dict(amount=CartItem.amount + stmt.excluded.amount),
+    )
+    stmt = stmt.returning(CartItem)
+    rez = await db.scalar(stmt)
+    await db.commit()
+    return CartItemDTO.model_validate(rez)
+
+
+@cart_router.patch(
+    "/cart/{user_id}/products/{product_id}",
+    status_code=204,
+    dependencies=[Depends(check_user_product_exists)],
+)
+async def change_product_amount(
+    db: DBsession,
+    user_id: UUID,
+    new_amount: Annotated[int, Body(gt=0, embed=True)],
+    product_id: UUID,
+):
+    query = (
+        update(CartItem)
+        .values(amount=new_amount)
+        .where(and_(CartItem.user_id == user_id, CartItem.product_id == product_id))
+    )
+    await db.execute(query)
+    await db.commit()
+
+
+@cart_router.delete(
+    "/cart/{user_id}/products/{product_id}",
+    status_code=204,
+    dependencies=[Depends(check_user_product_exists)],
+)
+async def delete_product_from_cart(db: DBsession, user_id: UUID, product_id: UUID):
+    stmt = delete(CartItem).where(
+        and_(CartItem.user_id == user_id, CartItem.product_id == product_id)
+    )
+    await db.execute(stmt)
+    await db.commit()

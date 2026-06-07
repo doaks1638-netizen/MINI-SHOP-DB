@@ -6,7 +6,8 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.models import CartItem, Order
+    from app.models.cart_item import CartItem
+    from app.models.order import Order
 
 
 class User(Base):
