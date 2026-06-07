@@ -47,7 +47,7 @@ async def change_category_name(db: DBsession, category_id: UUID, name: Annotated
     check = select(Category).where(Category.id == category_id)
     category = await db.scalar(check)
     if not category:
-        raise HTTPException(status_code=404, detail='Category is not exist')
+        raise HTTPException(status_code=404, detail='Category not found')
     category.name = name
     await db.commit()
     return None

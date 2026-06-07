@@ -1,1 +1,2 @@
 from .user_product_check import check_user_product_exists
+from .warehouse import update_amount

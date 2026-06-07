@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Query, HTTPException
 from app.database import DBsession
-from sqlalchemy.sql import select, insert
+from sqlalchemy import select, insert, update, delete
 from app.models.order import Order
 from app.models.user import User
 from app.models.product import Product
 from app.models.order_item import OrderItem
 from typing import Annotated
-from app.schemas import OrderDTO, OrderCreateRequest
+from app.schemas import OrderDTO, OrderCreateRequest, OrderStatusEdit
+from uuid6 import UUID
 
 post_router = APIRouter(tags="posts")
 
@@ -71,3 +72,28 @@ async def create_order(db: DBsession, order: OrderCreateRequest):
     await db.commit()
 
     return {"order_id": new_order.id, "total_price": total_order_price}
+
+
+@post_router.get("/orders/{order_id}", response_model=OrderDTO)
+async def get_order_info(db: DBsession, order_id: UUID):
+    stmt = select(Order).where(Order.id == order_id)
+    order = await db.scalar(stmt)
+    return OrderDTO.model_validate(order)
+
+
+@post_router.patch("/orders/{order_id}", status_code=201)
+async def change_order(db: DBsession, new_status: OrderStatusEdit, order_id:UUID):
+    stmt = update(Order).values(status=new_status.status).where(Order.id == order_id).returning(Order)
+    post = await db.scalar(stmt)
+    if not post:
+        raise HTTPException(status_code=404, detail="Order not found")
+    await db.commit()
+
+
+@post_router.delete("/orders/{order_id}", status_code=204)
+async def delete_order(db: DBsession, order_id: UUID):
+    stmt = delete(Order).where(Order.id == order_id).returning(Order)
+    post = await db.scalar(stmt)
+    if not post:
+        raise HTTPException(status_code=404, detail="Order not found")
+    await db.commit()

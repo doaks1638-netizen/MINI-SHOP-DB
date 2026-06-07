@@ -1,6 +1,5 @@
 from pydantic import BaseModel, ConfigDict
 from uuid6 import UUID
-from app.schemas.shared import UserShare
 from app.models.order_status_enum import OrderStatus
 from datetime import datetime
 from decimal import Decimal
@@ -17,6 +16,6 @@ class OrderDTO(OrderCreate):
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
-
-class OrderRelDTO(OrderDTO):
-    user: UserShare
+class OrderStatusEdit(BaseModel):
+    status:OrderStatus
+    

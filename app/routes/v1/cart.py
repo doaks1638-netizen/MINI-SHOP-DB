@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Query, Body, Depends
+from fastapi import APIRouter, Query, Body, Depends, HTTPException
 from sqlalchemy import select, func, and_, update, delete
 from sqlalchemy.dialects.postgresql import insert
 from app.models.cart_item import CartItem
+from app.models.product import Product
 from app.schemas import Cart, CartItemDTO
 from app.database import DBsession
-from app.services import check_user_product_exists
+from app.services import check_user_product_exists, update_amount
 from typing import Annotated
 from uuid6 import UUID
 
-cart_router = APIRouter(tags=['CART'])
+cart_router = APIRouter(tags=["CART"])
 
 page_number = Annotated[int, Query(gt=0)]
 
@@ -44,6 +45,7 @@ async def get_user_cart(db: DBsession, page: page_number, user_id: UUID):
 
 @cart_router.post("/cart", status_code=201)
 async def create_new_cart(db: DBsession, item: CartItemDTO):
+    await update_amount(db, item.product_id, -item.amount)
     stmt = insert(CartItem).values(**item.model_dump())
     stmt = stmt.on_conflict_do_update(
         constraint="cart_user_product_pk",
@@ -58,31 +60,36 @@ async def create_new_cart(db: DBsession, item: CartItemDTO):
 @cart_router.patch(
     "/cart/{user_id}/products/{product_id}",
     status_code=204,
-    dependencies=[Depends(check_user_product_exists)],
 )
 async def change_product_amount(
     db: DBsession,
     user_id: UUID,
     new_amount: Annotated[int, Body(gt=0, embed=True)],
     product_id: UUID,
+    cart_item=Depends(check_user_product_exists),
 ):
-    query = (
-        update(CartItem)
-        .values(amount=new_amount)
-        .where(and_(CartItem.user_id == user_id, CartItem.product_id == product_id))
-    )
-    await db.execute(query)
+    old_amount = cart_item.amount
+    diff = new_amount - old_amount
+    await update_amount(db, product_id, -diff)
+
+    cart_item.amount  = new_amount
+
     await db.commit()
 
 
 @cart_router.delete(
     "/cart/{user_id}/products/{product_id}",
     status_code=204,
-    dependencies=[Depends(check_user_product_exists)],
 )
-async def delete_product_from_cart(db: DBsession, user_id: UUID, product_id: UUID):
-    stmt = delete(CartItem).where(
-        and_(CartItem.user_id == user_id, CartItem.product_id == product_id)
-    )
-    await db.execute(stmt)
+async def delete_product_from_cart(
+    db: DBsession,
+    user_id: UUID,
+    product_id: UUID,
+    cart_item=Depends(check_user_product_exists),
+):
+    old_amount = cart_item.amount
+    await update_amount(db, product_id, old_amount)
+
+    db.delete(cart_item)
+
     await db.commit()
