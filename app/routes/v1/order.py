@@ -1,27 +1,30 @@
 from fastapi import APIRouter, Query, HTTPException
 from app.database import DBsession
 from sqlalchemy import select, insert, update, delete
+from sqlalchemy.orm import selectinload
 from app.models.order import Order
 from app.models.user import User
 from app.models.product import Product
 from app.models.order_item import OrderItem
+from app.services import update_amount, debit_funds
 from typing import Annotated
 from app.schemas import OrderDTO, OrderCreateRequest, OrderStatusEdit
 from uuid6 import UUID
+from decimal import Decimal
 
-post_router = APIRouter(tags="posts")
+order_router = APIRouter(tags="orders")
 
 page_number = Annotated[int, Query(gt=0)]
 
 
-@post_router.get("/orders", response_model=list[OrderDTO])
+@order_router.get("/orders", response_model=list[OrderDTO])
 async def get_all_orders(db: DBsession, page: page_number):
     stmt = select(Order).limit(30).offset(30 * (page - 1))
     rez = await db.scalars(stmt)
     return [OrderDTO.model_validate(x) for x in rez.all()]
 
 
-@post_router.post("/orders", status_code=201)
+@order_router.post("/orders", status_code=201)
 async def create_order(db: DBsession, order: OrderCreateRequest):
     user_stmt = select(User).where(User.id == order.user_id)
     user = await db.scalar(user_stmt)
@@ -53,6 +56,8 @@ async def create_order(db: DBsession, order: OrderCreateRequest):
     for item in order.items:
         db_product = products[item.product_id]
 
+        await update_amount(db, item.product_id, -item.amount)
+
         actual_price = db_product.price
 
         data = {
@@ -65,6 +70,8 @@ async def create_order(db: DBsession, order: OrderCreateRequest):
         insert_data.append(data)
         total_order_price += actual_price * item.amount
 
+    await debit_funds(db, order.user_id, -total_order_price)
+
     insert_stmt = insert(OrderItem).values(insert_data)
     new_order.total_price = total_order_price
 
@@ -74,26 +81,37 @@ async def create_order(db: DBsession, order: OrderCreateRequest):
     return {"order_id": new_order.id, "total_price": total_order_price}
 
 
-@post_router.get("/orders/{order_id}", response_model=OrderDTO)
+@order_router.get("/orders/{order_id}", response_model=OrderDTO)
 async def get_order_info(db: DBsession, order_id: UUID):
     stmt = select(Order).where(Order.id == order_id)
     order = await db.scalar(stmt)
+    if not order:
+        raise HTTPException(status_code=404, detail="User not found")
     return OrderDTO.model_validate(order)
 
 
-@post_router.patch("/orders/{order_id}", status_code=201)
-async def change_order(db: DBsession, new_status: OrderStatusEdit, order_id:UUID):
-    stmt = update(Order).values(status=new_status.status).where(Order.id == order_id).returning(Order)
+@order_router.patch("/orders/{order_id}")
+async def change_order(db: DBsession, new_status: OrderStatusEdit, order_id: UUID):
+    stmt = (
+        update(Order)
+        .values(status=new_status.status)
+        .where(Order.id == order_id)
+        .returning(Order)
+    )
     post = await db.scalar(stmt)
     if not post:
         raise HTTPException(status_code=404, detail="Order not found")
     await db.commit()
 
 
-@post_router.delete("/orders/{order_id}", status_code=204)
+@order_router.delete("/orders/{order_id}", status_code=204)  # update amount + payment
 async def delete_order(db: DBsession, order_id: UUID):
-    stmt = delete(Order).where(Order.id == order_id).returning(Order)
-    post = await db.scalar(stmt)
-    if not post:
+    stmt = select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
+    order = await db.scalar(stmt)
+    if not order:
         raise HTTPException(status_code=404, detail="Order not found")
+    for order_item in order.items:
+        await update_amount(db, order_item.product_id, order_item.amount)
+    await db.delete(order)
+    await debit_funds(db, order.user_id, order.total_price)
     await db.commit()

@@ -1,0 +1,15 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from uuid6 import UUID
+from decimal import Decimal
+from app.models.user import User
+from fastapi import HTTPException
+
+
+async def debit_funds(db: AsyncSession, user_id: UUID, diff: Decimal):
+    stmt = select(User).where(User.id == user_id).with_for_update()
+    user = await db.scalar(stmt)
+    new_balance = user.balance + diff
+    if new_balance < 0:
+        raise HTTPException(status_code=402, detail="Insufficient funds in the account")
+    user.balance = new_balance
