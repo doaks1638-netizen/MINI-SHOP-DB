@@ -1,20 +1,73 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from app.database import DBsession
-from sqlalchemy.sql import select
-from app.models import Order
+from sqlalchemy.sql import select, insert
+from app.models.order import Order
+from app.models.user import User
+from app.models.product import Product
+from app.models.order_item import OrderItem
 from typing import Annotated
-from app.schemas import CategoryDTO, OrderCreate
+from app.schemas import OrderDTO, OrderCreateRequest
 
 post_router = APIRouter(tags="posts")
 
 page_number = Annotated[int, Query(gt=0)]
 
 
-@post_router.get("/orders", response_model=list[CategoryDTO])
+@post_router.get("/orders", response_model=list[OrderDTO])
 async def get_all_orders(db: DBsession, page: page_number):
     stmt = select(Order).limit(30).offset(30 * (page - 1))
     rez = await db.scalars(stmt)
-    return [CategoryDTO.model_validate(x) for x in rez.all()]
+    return [OrderDTO.model_validate(x) for x in rez.all()]
 
 
-# @post_router.post('orders', status_code=204)
+@post_router.post("/orders", status_code=201)
+async def create_order(db: DBsession, order: OrderCreateRequest):
+    user_stmt = select(User).where(User.id == order.user_id)
+    user = await db.scalar(user_stmt)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not order.items:
+        raise HTTPException(status_code=400, detail="The order must contain items!")
+
+    new_order = Order(user_id=user.id)
+    db.add(new_order)
+    await db.flush()
+
+    products_id = {item.product_id for item in order.items}
+    order_objects_stmt = select(Product).where(Product.id.in_(products_id))
+    rez = await db.scalars(order_objects_stmt)
+    order_objects = rez.all()
+
+    products = {p.id: p for p in order_objects}
+
+    if len(products_id) != len(products):
+        raise HTTPException(
+            status_code=404, detail="The price of some orders not found"
+        )
+
+    insert_data = []
+    total_order_price = 0
+
+    for item in order.items:
+        db_product = products[item.product_id]
+
+        actual_price = db_product.price
+
+        data = {
+            "order_id": new_order.id,
+            "amount": item.amount,
+            "product_id": item.product_id,
+            "price_for_one": actual_price,
+        }
+
+        insert_data.append(data)
+        total_order_price += actual_price * item.amount
+
+    insert_stmt = insert(OrderItem).values(insert_data)
+    new_order.total_price = total_order_price
+
+    await db.execute(insert_stmt)
+    await db.commit()
+
+    return {"order_id": new_order.id, "total_price": total_order_price}

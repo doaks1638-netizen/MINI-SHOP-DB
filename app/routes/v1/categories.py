@@ -3,7 +3,7 @@ from sqlalchemy import select, insert
 from sqlalchemy.orm import selectinload
 from app.database import DBsession
 from app.schemas import CategoryDTO, CategoryCreate, CategoryRelDTO
-from app.models import Category
+from app.models.categories import Category
 from typing import Annotated
 from uuid6 import UUID
 
