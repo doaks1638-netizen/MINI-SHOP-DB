@@ -7,7 +7,7 @@ from app.database import DBsession
 from app.services import check_user_product_exists, update_amount
 from typing import Annotated
 from uuid import UUID
-from app.routes.dependencies import page_number
+from app.routes import page_number
 from app.models.user import User
 from app.models.product import Product
 

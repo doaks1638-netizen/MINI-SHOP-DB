@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
+from datetime import timedelta
 
 parent_path = Path(__file__).parent.parent  # path to .env file in project path
 
@@ -15,6 +16,14 @@ class Settings(BaseSettings):
 
     def get_db_url(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+    ACCESS_TOKEN_TIME: timedelta = timedelta(hours=1)
+    REFRESH_TOKEN_TIME: timedelta = timedelta(days=30)
+
+    JWT_SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+
+    MAX_USER_SESSION: int = 10
 
     model_config = SettingsConfigDict(
         extra="ignore",

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.database import DBsession
-from app.routes.dependencies import page_number
+from app.routes import page_number
 from app.models.product import Product
 from app.models.categories import Category
 from app.schemas import ProductDTO, ProductCreate, ProductRelDTO, ProductPatch
@@ -8,7 +8,7 @@ from sqlalchemy import select, and_, insert, update
 from sqlalchemy.orm import joinedload
 from uuid import UUID
 
-product_router = APIRouter()
+product_router = APIRouter(tags=['PRODUCTS'])
 
 
 @product_router.get("/products", response_model=list[ProductDTO])

@@ -11,9 +11,9 @@ from app.services import update_amount, debit_funds
 from app.schemas import OrderDTO, OrderCreateRequest, OrderStatusEdit, OrderRelDTO
 from app.models.categories import Category
 from uuid import UUID
-from app.routes.dependencies import page_number
+from app.routes import page_number
 
-order_router = APIRouter(tags=["orders"])
+order_router = APIRouter(tags=["ORDERS"])
 
 
 @order_router.get(

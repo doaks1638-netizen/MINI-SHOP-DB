@@ -7,7 +7,7 @@ from app.models.categories import Category
 from app.models.product import Product
 from typing import Annotated
 from uuid import UUID
-from app.routes.dependencies import page_number
+from app.routes import page_number
 
 category_router = APIRouter(tags=["CATEGORIES"])
 
