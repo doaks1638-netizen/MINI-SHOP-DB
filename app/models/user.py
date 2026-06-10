@@ -10,6 +10,8 @@ class User(Base):
 
     id: Mapped[idpk]
     name: Mapped[str] = mapped_column(String(100))
+    email: Mapped[str] = mapped_column(String(100))
+    hash_password: Mapped[str] = mapped_column(String(100))
     balance: Mapped[Decimal] = mapped_column(Numeric(10, 2), server_default=text("0"))
     is_active: Mapped[active]
 

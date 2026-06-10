@@ -1,15 +1,19 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
 
 
-class UserCreate(BaseModel):  # auntification on future
+class UserCreate(BaseModel):
     name: Annotated[str, Field(max_length=100)]
+    email: EmailStr
+    password: Annotated[str, Field(min_length=8)]
 
 
-class UserDTO(UserCreate):
+class UserDTO(BaseModel):
     id: UUID
+    name: Annotated[str, Field(max_length=100)]
+    email: EmailStr
     balance: Annotated[Decimal, Field(ge=0)]
     model_config = ConfigDict(from_attributes=True)
 

@@ -16,6 +16,7 @@ from app.models.cart_item import CartItem  # noqa: F401
 from app.models.order import Order  # noqa: F401
 from app.models.order_item import OrderItem  # noqa: F401
 from app.models.categories import Category  # noqa: F401
+from app.models.session import UserSession  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
