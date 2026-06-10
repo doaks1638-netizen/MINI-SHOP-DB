@@ -13,3 +13,5 @@ idpk = Annotated[
     UUID,
     mapped_column(primary_key=True, default=uuid7, server_default=text("uuidv7()")),
 ]
+
+active = Annotated[bool, mapped_column(server_default=text("true"), default=True)]

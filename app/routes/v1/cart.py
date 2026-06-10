@@ -8,6 +8,8 @@ from app.services import check_user_product_exists, update_amount
 from typing import Annotated
 from uuid import UUID
 from app.routes.dependencies import page_number
+from app.models.user import User
+from app.models.product import Product
 
 cart_router = APIRouter(tags=["CART"])
 
@@ -21,6 +23,9 @@ async def get_all_carts(db: DBsession, page: page_number):
             func.sum(CartItem.amount).label("total_items"),
         )
         .select_from(CartItem)
+        .join(User, CartItem.user_id == User.id)
+        .join(Product, CartItem.product_id == Product.id)
+        .where(User.is_active == True, Product.is_active == True)
         .group_by(CartItem.user_id)
         .limit(30)
         .offset(30 * (page - 1))
@@ -33,6 +38,9 @@ async def get_all_carts(db: DBsession, page: page_number):
 async def get_user_cart(db: DBsession, page: page_number, user_id: UUID):
     query = (
         select(CartItem)
+        .join(User, CartItem.user_id == User.id)
+        .join(Product, CartItem.product_id == Product.id)
+        .where(User.is_active == True, Product.is_active == True)
         .where(CartItem.user_id == user_id)
         .limit(30)
         .offset(30 * (page - 1))

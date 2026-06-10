@@ -13,3 +13,10 @@ class ProductShare(BaseModel):
     price: Annotated[Decimal, Field(ge=0)]
     now_amount: Annotated[int, Field(ge=0)]
     model_config = ConfigDict(from_attributes=True)
+
+
+class OrderItemShare(BaseModel):
+    product_id: UUID
+    amount: Annotated[int, Field(gt=0)]
+    order_id: UUID
+    price_for_one: Annotated[Decimal, Field(ge=0)]

@@ -21,6 +21,7 @@ async def get_users(db: DBsession, page: page_number):
             func.count(Order.id).label("orders_count"),
         )
         .outerjoin(Order)
+        .where(User.is_active == True)
         .group_by(User.id, User.name, User.balance)
         .limit(30)
         .offset(30 * (page - 1))
@@ -55,7 +56,12 @@ async def delete_user(db: DBsession, user: user_depens):
 
 @user_router.get("/users/{user_id}/orders", response_model=list[OrderDTO])
 async def get_user_orders(db: DBsession, user_id: UUID):
-    user_stmt = select(1).select_from(User).where(User.id == user_id)
+    user_stmt = (
+        select(1)
+        .select_from(User)
+        .where(User.id == user_id)
+        .where(User.is_active == True)
+    )
     user_exists = await db.scalar(user_stmt)
     if not user_exists:
         raise HTTPException(status_code=404, detail="User not found")

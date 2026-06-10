@@ -1,4 +1,4 @@
-from app.models import Base, idpk
+from app.models import Base, idpk, active
 from sqlalchemy.types import String, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, CheckConstraint, UniqueConstraint
@@ -21,6 +21,7 @@ class Product(Base):
     description: Mapped[str] = mapped_column(String(200), nullable=True)
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     now_amount: Mapped[int]
+    is_active: Mapped[active]
 
     category: Mapped["Category"] = relationship(back_populates="products")
 

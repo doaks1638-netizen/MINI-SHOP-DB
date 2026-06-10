@@ -1,4 +1,4 @@
-from app.models import Base, idpk
+from app.models import Base, idpk, active
 from sqlalchemy.types import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import TYPE_CHECKING
@@ -15,7 +15,8 @@ class Category(Base):
 
     products: Mapped[list["Product"]] = relationship(
         back_populates="category",
-        single_parent=True,
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+
+    is_active: Mapped[active]

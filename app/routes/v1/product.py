@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from app.database import DBsession
 from app.routes.dependencies import page_number
 from app.models.product import Product
+from app.models.categories import Category
 from app.schemas import ProductDTO, ProductCreate, ProductRelDTO, ProductPatch
 from sqlalchemy import select, and_, insert, update
 from sqlalchemy.orm import joinedload
@@ -12,17 +13,28 @@ product_router = APIRouter()
 
 @product_router.get("/products", response_model=list[ProductDTO])
 async def get_all_products(db: DBsession, page: page_number):
-    stmt = select(Product).limit(30).offset(30 * (page - 1))
+    stmt = (
+        select(Product)
+        .join(Category)
+        .where(Product.is_active == True, Category.is_active == True)
+        .limit(30)
+        .offset(30 * (page - 1))
+    )
     rez = await db.scalars(stmt)
     return [ProductDTO.model_validate(x) for x in rez]
 
 
 @product_router.post("/products")
 async def create_new_product(db: DBsession, new_product: ProductCreate):
-    stmt = select(Product).where(
-        and_(
-            Product.category_id == new_product.category_id,
-            Product.name == new_product.name,
+    stmt = (
+        select(Product)
+        .join(Category)
+        .where(Product.is_active == True, Category.is_active == True)
+        .where(
+            and_(
+                Product.category_id == new_product.category_id,
+                Product.name == new_product.name,
+            )
         )
     )
     same_product = await db.scalar(stmt)
@@ -40,6 +52,8 @@ async def create_new_product(db: DBsession, new_product: ProductCreate):
 async def get_product(db: DBsession, product_id: UUID):
     stmt = (
         select(Product)
+        .join(Category)
+        .where(Product.is_active == True, Category.is_active == True)
         .options(joinedload(Product.category))
         .where(Product.id == product_id)
     )
@@ -58,8 +72,10 @@ async def change_product_info(db: DBsession, new_info: ProductPatch, product_id:
         )
     stmt = (
         update(Product)
-        .values(**new_info)
+        .where(Product.category_id == Category.id)
         .where(Product.id == product_id)
+        .where(Product.is_active == True, Category.is_active == True)
+        .values(**new_info)
         .returning(Product.id)
     )
     new_product = await db.scalar(stmt)

@@ -2,6 +2,7 @@ from app.models import Base, idpk, OrderStatus
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, text
 from sqlalchemy.types import Enum, Numeric
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from uuid import UUID
 from typing import TYPE_CHECKING
@@ -24,4 +25,4 @@ class Order(Base):
     )
     total_price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
 
-    items: Mapped[list["OrderItem"]] = relationship(back_populates="order")
+    items: Mapped[list[OrderItem]] = relationship()
