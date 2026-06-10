@@ -50,7 +50,7 @@ async def change_user_profile(db: DBsession, new_profile: UserPatch, user: user_
 
 @user_router.delete("/users/{user_id}", status_code=204)
 async def delete_user(db: DBsession, user: user_depens):
-    db.delete(user)
+    await db.delete(user)
     await db.commit()
 
 

@@ -96,6 +96,6 @@ async def delete_product_from_cart(
     old_amount = cart_item.amount
     await update_amount(db, product_id, old_amount)
 
-    db.delete(cart_item)
+    await db.delete(cart_item)
 
     await db.commit()

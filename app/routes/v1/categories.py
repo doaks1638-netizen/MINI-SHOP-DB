@@ -26,12 +26,7 @@ async def get_categories(db: DBsession, page: page_number):
 
 @category_router.post("/categories", status_code=201, response_model=CategoryDTO)
 async def create_category(db: DBsession, new_category: CategoryCreate):
-    query = (
-        select(1)
-        .select_from(Category)
-        .where(Category.name == new_category.name)
-        .where(Category.is_active == True)
-    )
+    query = select(1).select_from(Category).where(Category.name == new_category.name)
     category_with_same_name = await db.scalar(query)
     if category_with_same_name:
         raise HTTPException(status_code=409, detail="Category already exist")

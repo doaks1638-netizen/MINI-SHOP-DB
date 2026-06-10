@@ -7,7 +7,7 @@ from app.models.user import User
 from app.models.product import Product
 from app.models.order_item import OrderItem
 from app.services import update_amount, debit_funds
-from app.schemas import OrderDTO, OrderCreateRequest, OrderStatusEdit, OrderItemShare
+from app.schemas import OrderDTO, OrderCreateRequest, OrderStatusEdit, OrderRelDTO
 from app.models.categories import Category
 from uuid import UUID
 from app.routes.dependencies import page_number
@@ -95,7 +95,7 @@ async def create_order(db: DBsession, order: OrderCreateRequest):
     return {"order_id": new_order.id, "total_price": total_order_price}
 
 
-@order_router.get("/orders/{order_id}", response_model=OrderItemShare)
+@order_router.get("/orders/{order_id}", response_model=OrderRelDTO)
 async def get_order_info(db: DBsession, order_id: UUID):
     stmt = (
         select(Order)
@@ -106,8 +106,8 @@ async def get_order_info(db: DBsession, order_id: UUID):
     )
     order = await db.scalar(stmt)
     if not order:
-        raise HTTPException(status_code=404, detail="User not found")
-    return OrderItemShare.model_validate(order)
+        raise HTTPException(status_code=404, detail="Order not found")
+    return OrderRelDTO.model_validate(order)
 
 
 @order_router.patch("/orders/{order_id}")
@@ -140,6 +140,6 @@ async def delete_order(db: DBsession, order_id: UUID):
         raise HTTPException(status_code=404, detail="Order not found")
     for order_item in order.items:
         await update_amount(db, order_item.product_id, order_item.amount)
-    db.delete(order)
+    await db.delete(order)
     await debit_funds(db, order.user_id, order.total_price)
     await db.commit()

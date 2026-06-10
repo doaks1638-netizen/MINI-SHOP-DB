@@ -26,15 +26,10 @@ async def get_all_products(db: DBsession, page: page_number):
 
 @product_router.post("/products")
 async def create_new_product(db: DBsession, new_product: ProductCreate):
-    stmt = (
-        select(Product)
-        .join(Category)
-        .where(Product.is_active == True, Category.is_active == True)
-        .where(
-            and_(
-                Product.category_id == new_product.category_id,
-                Product.name == new_product.name,
-            )
+    stmt = select(Product).where(
+        and_(
+            Product.category_id == new_product.category_id,
+            Product.name == new_product.name,
         )
     )
     same_product = await db.scalar(stmt)
@@ -70,6 +65,12 @@ async def change_product_info(db: DBsession, new_info: ProductPatch, product_id:
         raise HTTPException(
             status_code=400, detail="At least one field must be provided for update"
         )
+    if new_info.get("category_id"):
+        new_info_category = select(Category).where(
+            Category.id == new_info["category_id"], Category.is_active == True
+        )
+        if not await db.scalar(new_info_category):
+            raise HTTPException(status_code=404, detail="Active category not found")
     stmt = (
         update(Product)
         .where(Product.category_id == Category.id)
