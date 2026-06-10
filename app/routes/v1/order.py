@@ -6,6 +6,7 @@ from app.models.order import Order
 from app.models.user import User
 from app.models.product import Product
 from app.models.order_item import OrderItem
+from app.models.order_status_enum import OrderStatus
 from app.services import update_amount, debit_funds
 from app.schemas import OrderDTO, OrderCreateRequest, OrderStatusEdit, OrderRelDTO
 from app.models.categories import Category
@@ -22,7 +23,7 @@ async def get_all_orders(db: DBsession, page: page_number):
     stmt = (
         select(Order)
         .join(User, User.id == Order.user_id)
-        .where(User.is_active == True)
+        .where(User.is_active == True, Order.status != OrderStatus.cancelled)
         .limit(30)
         .offset(30 * (page - 1))
     )
@@ -140,6 +141,6 @@ async def delete_order(db: DBsession, order_id: UUID):
         raise HTTPException(status_code=404, detail="Order not found")
     for order_item in order.items:
         await update_amount(db, order_item.product_id, order_item.amount)
-    await db.delete(order)
+    order.status = OrderStatus.cancelled
     await debit_funds(db, order.user_id, order.total_price)
     await db.commit()

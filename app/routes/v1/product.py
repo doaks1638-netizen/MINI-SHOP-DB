@@ -83,3 +83,14 @@ async def change_product_info(db: DBsession, new_info: ProductPatch, product_id:
     if not new_product:
         raise HTTPException(status_code=404, detail="Product not found")
     await db.commit()
+
+
+@product_router.delete("/products/{product_id}", status_code=204)
+async def delte_product(db: DBsession, product_id: UUID):
+    product = await db.scalar(
+        select(Product).where(Product.id == product_id, Product.is_active == True)
+    )
+    if not product:
+        raise HTTPException(404, detail="Product nor found")
+    product.is_active = False
+    await db.commit()

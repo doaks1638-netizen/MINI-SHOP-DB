@@ -55,7 +55,7 @@ async def get_category(db: DBsession, category_id: UUID):
     return CategoryRelDTO.model_validate(rez)
 
 
-@category_router.patch("/categories/{category_id}", status_code=204)
+@category_router.patch("/categories/{category_id}", status_code=201)
 async def change_category_name(
     db: DBsession,
     category_id: UUID,
@@ -72,3 +72,14 @@ async def change_category_name(
     category.name = name
     await db.commit()
     return None
+
+
+@category_router.delete("/categories/{category_id}", status_code=204)
+async def delete_category(db: DBsession, category_id: UUID):
+    category: Category = await db.scalar(
+        select(Category).where(Category.id == category_id, Category.is_active == True)
+    )
+    if not category:
+        raise HTTPException(404, detail="Category not found")
+    category.is_active = False
+    await db.commit()
