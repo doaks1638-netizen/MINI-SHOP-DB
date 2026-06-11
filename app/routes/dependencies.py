@@ -11,7 +11,7 @@ import jwt
 page_number = Annotated[int, Query(gt=0)]
 
 
-oauth_scheme = OAuth2PasswordBearer("/api/v1/users/token")
+oauth_scheme = OAuth2PasswordBearer("/api/v1/auth/token")
 
 exc = HTTPException(
     401,
@@ -23,8 +23,14 @@ expired_exc = HTTPException(
     401, detail="Token has expired", headers={"WWW-Authenticate": "Bearer"}
 )
 
+role_exc = HTTPException(
+    403,
+    "Administrative privileges are not available. Access denied.",
+    headers={"WWW-Authenticate": "Bearer"},
+)
 
-async def get_current_user(db: DBsession, token=Depends(oauth_scheme)):
+
+async def get_current_user_func(db: DBsession, token=Depends(oauth_scheme)):
     try:
         payload = jwt.decode(
             token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM]
@@ -46,3 +52,24 @@ async def get_current_user(db: DBsession, token=Depends(oauth_scheme)):
         raise exc
 
     return user
+
+
+type get_current_user = Annotated[User, Depends(get_current_user_func)]
+
+
+async def get_current_admin_func(user: get_current_user):
+    if user.role != "admin":
+        raise role_exc
+
+    return user
+
+
+async def get_current_creator_func(user: get_current_user):
+    if user.role != "creater":
+        raise role_exc
+
+    return user
+
+
+type get_current_admin = Annotated[User, Depends(get_current_admin_func)]
+type get_current_creator = Annotated[User, Depends(get_current_creator_func)]

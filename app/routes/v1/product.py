@@ -21,7 +21,7 @@ async def get_all_products(db: DBsession, page: page_number):
         .offset(30 * (page - 1))
     )
     rez = await db.scalars(stmt)
-    return [ProductDTO.model_validate(x) for x in rez]
+    return rez
 
 
 @product_router.post("/products")
@@ -55,7 +55,7 @@ async def get_product(db: DBsession, product_id: UUID):
     product = await db.scalar(stmt)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    return ProductRelDTO.model_validate(product)
+    return product
 
 
 @product_router.patch("/products/{product_id}")

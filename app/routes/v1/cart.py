@@ -31,7 +31,7 @@ async def get_all_carts(db: DBsession, page: page_number):
         .offset(30 * (page - 1))
     )
     rez = await db.execute(query)
-    return [Cart.model_validate(x) for x in rez.mappings().all()]
+    return rez.mappings().all()
 
 
 @cart_router.get("/cart/{user_id}", response_model=list[CartItemDTO])
@@ -46,10 +46,10 @@ async def get_user_cart(db: DBsession, page: page_number, user_id: UUID):
         .offset(30 * (page - 1))
     )
     rez = await db.execute(query)
-    return [CartItemDTO.model_validate(x) for x in rez.scalars().all()]
+    return rez.scalars().all()
 
 
-@cart_router.post("/cart", status_code=201)
+@cart_router.post("/cart", status_code=201, response_model=CartItemDTO)
 async def create_new_cart(db: DBsession, item: CartItemDTO):
     await update_amount(db, item.product_id, -item.amount)
     stmt = insert(CartItem).values(**item.model_dump())
@@ -60,7 +60,7 @@ async def create_new_cart(db: DBsession, item: CartItemDTO):
     stmt = stmt.returning(CartItem)
     rez = await db.scalar(stmt)
     await db.commit()
-    return CartItemDTO.model_validate(rez)
+    return rez
 
 
 @cart_router.patch(

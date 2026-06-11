@@ -1,8 +1,9 @@
 from app.models import Base, idpk, active
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.types import String, Numeric
+from sqlalchemy.types import String, Numeric, Enum
 from sqlalchemy import text, CheckConstraint, UniqueConstraint
 from decimal import Decimal
+from app.models.user_role_enum import UserRole
 
 
 class User(Base):
@@ -14,6 +15,9 @@ class User(Base):
     hash_password: Mapped[str]
     balance: Mapped[Decimal] = mapped_column(Numeric(10, 2), server_default=text("0"))
     is_active: Mapped[active]
+    role: Mapped[UserRole] = mapped_column(
+        Enum(UserRole, native_enum=False), default=UserRole.user
+    )
 
     __table_args__ = (
         CheckConstraint("balance >= 0", name="check_user_balance_positive"),

@@ -28,7 +28,7 @@ async def get_all_orders(db: DBsession, page: page_number):
         .offset(30 * (page - 1))
     )
     rez = await db.scalars(stmt)
-    return [OrderDTO.model_validate(x) for x in rez.all()]
+    return rez.all()
 
 
 @order_router.post("/orders", status_code=201)
@@ -108,7 +108,7 @@ async def get_order_info(db: DBsession, order_id: UUID):
     order = await db.scalar(stmt)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    return OrderRelDTO.model_validate(order)
+    return order
 
 
 @order_router.patch("/orders/{order_id}")

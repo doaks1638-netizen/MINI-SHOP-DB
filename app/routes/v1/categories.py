@@ -21,7 +21,7 @@ async def get_categories(db: DBsession, page: page_number):
         .offset(30 * (page - 1))
     )
     rez = await db.scalars(stmt)
-    return [CategoryDTO.model_validate(x) for x in rez.all()]
+    return rez.all()
 
 
 @category_router.post("/categories", status_code=201, response_model=CategoryDTO)
@@ -35,7 +35,7 @@ async def create_category(db: DBsession, new_category: CategoryCreate):
     stmt = stmt.returning(Category)
     rez = await db.scalar(stmt)
     await db.commit()
-    return CategoryDTO.model_validate(rez)
+    return rez
 
 
 @category_router.get("/categories/{category_id}", response_model=CategoryRelDTO)
@@ -52,7 +52,7 @@ async def get_category(db: DBsession, category_id: UUID):
     rez = await db.scalar(stmt)
     if not rez:
         raise HTTPException(status_code=404, detail="Category not found")
-    return CategoryRelDTO.model_validate(rez)
+    return rez
 
 
 @category_router.patch("/categories/{category_id}", status_code=201)
