@@ -15,4 +15,4 @@ async def check_user_exist(db: DBsession, user_id: UUID):
     return user
 
 
-type user_depens = Annotated[User, Depends(check_user_exist)]
+type user_depends = Annotated[User, Depends(check_user_exist)]

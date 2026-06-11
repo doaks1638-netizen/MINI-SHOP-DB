@@ -40,11 +40,12 @@ async def registry_new_user(db: DBsession, new_user: UserCreate):
         email=new_user.email,
         hash_password=create_hash_password(new_user.password),
     )
-    token_id = uuid7()
     db.add(new_user)
     await db.flush()
 
     await check_session_limit(db=db, user_id=new_user.id)
+
+    token_id = uuid7()
 
     new_session = UserSession(
         user_id=new_user.id,
@@ -85,7 +86,7 @@ async def refresh_tokens(db: DBsession, refresh_token: RefreshToken):
 
     session = await db.scalar(
         select(UserSession).where(
-            UserSession.id == session_id, UserSession.is_active == True
+            UserSession.id == UUID(session_id), UserSession.is_active == True
         )
     )
 
@@ -157,6 +158,8 @@ async def login(
 
     tokens = create_tokens(access_data, refresh_data)
 
+    await db.commit()
+
     return tokens
 
 
@@ -172,7 +175,7 @@ async def delete_user_session(db: DBsession, refresh_token: RefreshToken):
 
     session = await db.scalar(
         select(UserSession).where(
-            UserSession.id == session_id, UserSession.is_active == True
+            UserSession.id == UUID(session_id), UserSession.is_active == True
         )
     )
 

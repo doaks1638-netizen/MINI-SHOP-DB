@@ -57,7 +57,7 @@ def decode_refresh_token(refresh_token):
         token_id = payload.get("token_id")
         token_type = payload.get("token_type")
 
-        if not user_id or not session_id or not token_id or not token_type == "refresh":
+        if not user_id or not session_id or not token_id or token_type != "refresh":
             raise exc
 
     except jwt.ExpiredSignatureError:

@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Body, Depends
 from sqlalchemy import select, func
-from sqlalchemy.dialects.postgresql import insert
 from app.models.cart_item import CartItem
 from app.schemas import Cart, CartItemDTO
 from app.database import DBsession
@@ -10,11 +9,13 @@ from uuid import UUID
 from app.routes import page_number
 from app.models.user import User
 from app.models.product import Product
+from app.routes.dependencies import get_current_admin
+admin_cart_router = APIRouter(
+    prefix="/admin/cart", dependencies=[Depends(get_current_admin)], tags=["ADMIN"]
+)
 
-cart_router = APIRouter(tags=["CART"])
 
-
-@cart_router.get("/cart", response_model=list[Cart])
+@admin_cart_router.get("/", response_model=list[Cart])
 async def get_all_carts(db: DBsession, page: page_number):
     query = (
         select(
@@ -34,7 +35,7 @@ async def get_all_carts(db: DBsession, page: page_number):
     return rez.mappings().all()
 
 
-@cart_router.get("/cart/{user_id}", response_model=list[CartItemDTO])
+@admin_cart_router.get("/{user_id}", response_model=list[CartItemDTO])
 async def get_user_cart(db: DBsession, page: page_number, user_id: UUID):
     query = (
         select(CartItem)
@@ -49,27 +50,12 @@ async def get_user_cart(db: DBsession, page: page_number, user_id: UUID):
     return rez.scalars().all()
 
 
-@cart_router.post("/cart", status_code=201, response_model=CartItemDTO)
-async def create_new_cart(db: DBsession, item: CartItemDTO):
-    await update_amount(db, item.product_id, -item.amount)
-    stmt = insert(CartItem).values(**item.model_dump())
-    stmt = stmt.on_conflict_do_update(
-        constraint="cart_user_product_pk",
-        set_=dict(amount=CartItem.amount + stmt.excluded.amount),
-    )
-    stmt = stmt.returning(CartItem)
-    rez = await db.scalar(stmt)
-    await db.commit()
-    return rez
-
-
-@cart_router.patch(
-    "/cart/{user_id}/products/{product_id}",
+@admin_cart_router.patch(
+    "/{user_id}/products/{product_id}",
     status_code=204,
 )
 async def change_product_amount(
     db: DBsession,
-    user_id: UUID,
     new_amount: Annotated[int, Body(gt=0, embed=True)],
     product_id: UUID,
     cart_item=Depends(check_user_product_exists),
@@ -83,13 +69,12 @@ async def change_product_amount(
     await db.commit()
 
 
-@cart_router.delete(
-    "/cart/{user_id}/products/{product_id}",
+@admin_cart_router.delete(
+    "/{user_id}/products/{product_id}",
     status_code=204,
 )
 async def delete_product_from_cart(
     db: DBsession,
-    user_id: UUID,
     product_id: UUID,
     cart_item=Depends(check_user_product_exists),
 ):

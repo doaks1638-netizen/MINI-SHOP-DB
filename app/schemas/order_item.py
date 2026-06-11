@@ -15,5 +15,4 @@ class OrderItemDTO(OrderItemCreate):
 
 
 class OrderCreateRequest(BaseModel):
-    user_id: UUID
     items: list["OrderItemCreate"]

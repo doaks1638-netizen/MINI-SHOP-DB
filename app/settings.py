@@ -33,4 +33,4 @@ class Settings(BaseSettings):
     )
 
 
-settings = Settings()  # make settings singlitone
+settings = Settings()  # make settings singleton

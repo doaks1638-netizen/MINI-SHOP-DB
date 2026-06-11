@@ -23,4 +23,4 @@ class OrderStatusEdit(BaseModel):
 
 
 class OrderRelDTO(OrderDTO):
-    items: list[OrderItemShare]
+    items: list['OrderItemShare']

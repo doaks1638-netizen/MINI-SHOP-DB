@@ -11,13 +11,7 @@ class Cart(
     total_items: int
 
 
-class CartItemView(
-    BaseModel
-):  # this model show of items in user cart - for beautiful view
+class CartItemDTO(BaseModel):
     product_id: UUID
     amount: Annotated[int, Field(gt=0)]
     model_config = ConfigDict(from_attributes=True)
-
-
-class CartItemDTO(CartItemView):  # data transfer object for new item creation
-    user_id: UUID

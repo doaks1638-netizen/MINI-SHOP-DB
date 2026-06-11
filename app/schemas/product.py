@@ -8,7 +8,7 @@ from app.schemas.categories import CategoryDTO
 class ProductCreate(BaseModel):
     category_id: UUID
     name: Annotated[str, Field(max_length=100)]
-    description: Annotated[str, Field(max_length=2000, default=None)]
+    description: Annotated[str | None, Field(max_length=200)] = None
     price: Annotated[Decimal, Field(ge=0)]
     now_amount: Annotated[int, Field(ge=0)]
 

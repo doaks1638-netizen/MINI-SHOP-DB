@@ -11,6 +11,10 @@ class UserCreate(BaseModel):
     password: Annotated[str, Field(min_length=8)]
 
 
+class FullUserCreate(UserCreate):
+    role: UserRole = UserRole.creator
+
+
 class UserDTO(BaseModel):
     id: UUID
     name: Annotated[str, Field(max_length=100)]
@@ -20,7 +24,8 @@ class UserDTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class UserRelCount(UserDTO):
+class UserDTOCount(BaseModel):
+    name: Annotated[str, Field(max_length=100)]
     orders_count: Annotated[int, Field(ge=0)]
 
 

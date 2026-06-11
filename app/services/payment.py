@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from uuid6 import UUID
+from uuid import UUID
 from decimal import Decimal
 from app.models.user import User
 from fastapi import HTTPException

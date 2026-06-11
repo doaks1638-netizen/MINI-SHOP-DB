@@ -1,44 +1,28 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.database import DBsession
-from sqlalchemy import select, insert, update
+from sqlalchemy import select, insert
 from sqlalchemy.orm import selectinload
 from app.models.order import Order
-from app.models.user import User
 from app.models.product import Product
 from app.models.order_item import OrderItem
 from app.models.order_status_enum import OrderStatus
 from app.services import update_amount, debit_funds
-from app.schemas import OrderDTO, OrderCreateRequest, OrderStatusEdit, OrderRelDTO
+from app.schemas import OrderCreateRequest, OrderRelDTO
 from app.models.categories import Category
+from app.models.user import User
 from uuid import UUID
-from app.routes import page_number
+from typing import Annotated
+from app.routes.dependencies import get_current_user
 
-order_router = APIRouter(tags=["ORDERS"])
-
-
-@order_router.get(
-    "/orders", response_model=list[OrderDTO]
-)  # тут вытащить из токена кто это запросил и показть спискок просто заказов без items ему
-async def get_all_orders(db: DBsession, page: page_number):
-    stmt = (
-        select(Order)
-        .join(User, User.id == Order.user_id)
-        .where(User.is_active == True, Order.status != OrderStatus.cancelled)
-        .limit(30)
-        .offset(30 * (page - 1))
-    )
-    rez = await db.scalars(stmt)
-    return rez.all()
+order_router = APIRouter(prefix="/orders", tags=["ORDERS"])
 
 
-@order_router.post("/orders", status_code=201)
-async def create_order(db: DBsession, order: OrderCreateRequest):
-    user_stmt = (
-        select(User).where(User.is_active == True).where(User.id == order.user_id)
-    )
-    user = await db.scalar(user_stmt)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+@order_router.post("/", status_code=201)
+async def create_order(
+    db: DBsession,
+    order: OrderCreateRequest,
+    user: Annotated[User, Depends(get_current_user)],
+):
 
     if not order.items:
         raise HTTPException(status_code=400, detail="The order must contain items!")
@@ -85,7 +69,7 @@ async def create_order(db: DBsession, order: OrderCreateRequest):
         insert_data.append(data)
         total_order_price += actual_price * item.amount
 
-    await debit_funds(db, order.user_id, -total_order_price)
+    await debit_funds(db, user.id, -total_order_price)
 
     insert_stmt = insert(OrderItem).values(insert_data)
     new_order.total_price = total_order_price
@@ -96,14 +80,14 @@ async def create_order(db: DBsession, order: OrderCreateRequest):
     return {"order_id": new_order.id, "total_price": total_order_price}
 
 
-@order_router.get("/orders/{order_id}", response_model=OrderRelDTO)
-async def get_order_info(db: DBsession, order_id: UUID):
+@order_router.get("/me/{order_id}", response_model=OrderRelDTO)
+async def get_my_order_info(
+    db: DBsession, order_id: UUID, user: Annotated[User, Depends(get_current_user)]
+):
     stmt = (
         select(Order)
         .options(selectinload(Order.items))
-        .join(User, User.id == Order.user_id)
-        .where(User.is_active == True)
-        .where(Order.id == order_id)
+        .where(Order.id == order_id, Order.user_id == user.id)
     )
     order = await db.scalar(stmt)
     if not order:
@@ -111,30 +95,14 @@ async def get_order_info(db: DBsession, order_id: UUID):
     return order
 
 
-@order_router.patch("/orders/{order_id}")
-async def change_order(db: DBsession, new_status: OrderStatusEdit, order_id: UUID):
-    stmt = (
-        update(Order)
-        .where(Order.user_id == User.id)
-        .where(Order.id == order_id)
-        .where(User.is_active == True)
-        .values(status=new_status.status)
-        .returning(Order.id)
-    )
-    post = await db.scalar(stmt)
-    if not post:
-        raise HTTPException(status_code=404, detail="Order not found")
-    await db.commit()
-
-
-@order_router.delete("/orders/{order_id}", status_code=204)  # update amount + payment
-async def delete_order(db: DBsession, order_id: UUID):
+@order_router.delete("/me/{order_id}", status_code=204)
+async def delete_my_order(
+    db: DBsession, order_id: UUID, user: Annotated[User, Depends(get_current_user)]
+):
     stmt = (
         select(Order)
         .options(selectinload(Order.items))
-        .join(User, User.id == Order.user_id)
-        .where(User.is_active == True)
-        .where(Order.id == order_id)
+        .where(Order.id == order_id, Order.user_id == user.id)
     )
     order = await db.scalar(stmt)
     if not order:

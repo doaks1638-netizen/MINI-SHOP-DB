@@ -1,30 +1,18 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.database import DBsession
-from app.routes import page_number
 from app.models.product import Product
 from app.models.categories import Category
-from app.schemas import ProductDTO, ProductCreate, ProductRelDTO, ProductPatch
+from app.schemas import ProductCreate, ProductPatch
 from sqlalchemy import select, and_, insert, update
-from sqlalchemy.orm import joinedload
 from uuid import UUID
+from app.routes.dependencies import get_current_admin
 
-product_router = APIRouter(tags=['PRODUCTS'])
-
-
-@product_router.get("/products", response_model=list[ProductDTO])
-async def get_all_products(db: DBsession, page: page_number):
-    stmt = (
-        select(Product)
-        .join(Category)
-        .where(Product.is_active == True, Category.is_active == True)
-        .limit(30)
-        .offset(30 * (page - 1))
-    )
-    rez = await db.scalars(stmt)
-    return rez
+admin_product_router = APIRouter(
+    prefix="/admin/products", tags=["ADMIN"], dependencies=[Depends(get_current_admin)]
+)
 
 
-@product_router.post("/products")
+@admin_product_router.post("/")
 async def create_new_product(db: DBsession, new_product: ProductCreate):
     stmt = select(Product).where(
         and_(
@@ -43,22 +31,7 @@ async def create_new_product(db: DBsession, new_product: ProductCreate):
     await db.commit()
 
 
-@product_router.get("/products/{product_id}", response_model=ProductRelDTO)
-async def get_product(db: DBsession, product_id: UUID):
-    stmt = (
-        select(Product)
-        .join(Category)
-        .where(Product.is_active == True, Category.is_active == True)
-        .options(joinedload(Product.category))
-        .where(Product.id == product_id)
-    )
-    product = await db.scalar(stmt)
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return product
-
-
-@product_router.patch("/products/{product_id}")
+@admin_product_router.patch("/{product_id}")
 async def change_product_info(db: DBsession, new_info: ProductPatch, product_id: UUID):
     new_info = new_info.model_dump(exclude_unset=True)
     if not new_info:
@@ -85,12 +58,12 @@ async def change_product_info(db: DBsession, new_info: ProductPatch, product_id:
     await db.commit()
 
 
-@product_router.delete("/products/{product_id}", status_code=204)
-async def delte_product(db: DBsession, product_id: UUID):
+@admin_product_router.delete("/{product_id}", status_code=204)
+async def delete_product(db: DBsession, product_id: UUID):
     product = await db.scalar(
         select(Product).where(Product.id == product_id, Product.is_active == True)
     )
     if not product:
-        raise HTTPException(404, detail="Product nor found")
+        raise HTTPException(404, detail="Product not found")
     product.is_active = False
     await db.commit()

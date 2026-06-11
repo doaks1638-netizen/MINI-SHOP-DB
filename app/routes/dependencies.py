@@ -1,10 +1,11 @@
-# auntification function for future
+# authentication dependencies
 from fastapi import Depends, Query, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from typing import Annotated
 from app.database import DBsession
 from app.models.user import User
+from app.models.user_role_enum import UserRole
 from app.settings import settings
 import jwt
 
@@ -30,7 +31,7 @@ role_exc = HTTPException(
 )
 
 
-async def get_current_user_func(db: DBsession, token=Depends(oauth_scheme)):
+async def get_current_user(db: DBsession, token=Depends(oauth_scheme)):
     try:
         payload = jwt.decode(
             token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM]
@@ -54,22 +55,20 @@ async def get_current_user_func(db: DBsession, token=Depends(oauth_scheme)):
     return user
 
 
-type get_current_user = Annotated[User, Depends(get_current_user_func)]
-
-
-async def get_current_admin_func(user: get_current_user):
-    if user.role != "admin":
+async def get_current_admin(
+    user: Annotated[User, Depends(get_current_user)],
+):
+    if user.role not in [UserRole.admin, UserRole.creator]:
         raise role_exc
 
     return user
 
 
-async def get_current_creator_func(user: get_current_user):
-    if user.role != "creater":
+async def get_current_creator(
+    user: Annotated[User, Depends(get_current_user)],
+):
+    if user.role != UserRole.creator:
         raise role_exc
 
     return user
 
-
-type get_current_admin = Annotated[User, Depends(get_current_admin_func)]
-type get_current_creator = Annotated[User, Depends(get_current_creator_func)]
