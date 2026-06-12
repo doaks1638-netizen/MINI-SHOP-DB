@@ -46,7 +46,7 @@ async def get_user_orders(
         select(Order).where(Order.user_id == user.id).limit(30).offset(30 * (page - 1))
     )
     orders = await db.scalars(orders_stmt)
-    return orders
+    return orders.all()
 
 
 @user_router.post("/me/balance", response_model=NewBalance)

@@ -57,4 +57,4 @@ async def get_user_orders(db: DBsession, page: page_number, user: user_depends):
         select(Order).where(Order.user_id == user.id).limit(30).offset(30 * (page - 1))
     )
     orders = await db.scalars(orders_stmt)
-    return orders
+    return orders.all()

@@ -28,7 +28,12 @@ export default function AdminCategories() {
     }
   }, [page, toast]);
 
-  useEffect(() => { fetchCategories(); }, [fetchCategories]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchCategories();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchCategories]);
 
   const openCreate = () => { setEditingCat(null); setName(''); setModalOpen(true); };
   const openEdit = (cat) => { setEditingCat(cat); setName(cat.name); setModalOpen(true); };

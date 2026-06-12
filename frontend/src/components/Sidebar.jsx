@@ -1,6 +1,6 @@
 import { NavLink, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { HiOutlineViewGrid, HiOutlineShoppingBag, HiOutlineClipboardList, HiOutlineUser, HiOutlineCreditCard, HiOutlineCog, HiOutlineUsers, HiOutlineTag, HiOutlineShoppingCart, HiOutlineCollection, HiOutlineLogout, HiOutlineLogin } from 'react-icons/hi';
+import { HiOutlineViewGrid, HiOutlineShoppingBag, HiOutlineClipboardList, HiOutlineUser, HiOutlineCog, HiOutlineUsers, HiOutlineTag, HiOutlineShoppingCart, HiOutlineCollection, HiOutlineLogout, HiOutlineLogin } from 'react-icons/hi';
 import './Sidebar.css';
 
 export default function Sidebar({ isOpen, onClose }) {

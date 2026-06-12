@@ -1,11 +1,10 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { HiOutlineShoppingBag, HiOutlineViewGrid, HiOutlineClipboardList, HiOutlineUser, HiOutlineCog, HiOutlineUsers, HiOutlineTag, HiOutlineShoppingCart, HiOutlineCollection } from 'react-icons/hi';
+import { HiOutlineShoppingBag } from 'react-icons/hi';
 import './Navbar.css';
 
 export default function Navbar({ onToggleSidebar, cartCount = 0 }) {
-  const { user, isAuthenticated, logout, isAdmin } = useAuth();
-  const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
 
   return (
     <nav className="navbar glass-strong">

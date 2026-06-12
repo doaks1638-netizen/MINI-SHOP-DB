@@ -18,7 +18,7 @@ function authCallbackPlugin() {
         }
 
         try {
-          const backendUrl = `http://localhost:8000${req.url}`;
+          const backendUrl = `http://127.0.0.1:8000${req.url}`;
           const response = await fetch(backendUrl, {
             method: 'GET',
             headers: {
@@ -57,7 +57,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
       }
     }

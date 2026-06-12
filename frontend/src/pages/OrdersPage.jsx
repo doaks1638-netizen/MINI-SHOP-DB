@@ -26,7 +26,10 @@ export default function OrdersPage() {
   }, [page, toast]);
 
   useEffect(() => {
-    fetchOrders();
+    const timer = setTimeout(() => {
+      fetchOrders();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchOrders]);
 
   const handleCancel = async (orderId) => {

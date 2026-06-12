@@ -36,8 +36,18 @@ export default function AdminProducts() {
     } catch { /* ignore */ }
   }, []);
 
-  useEffect(() => { fetchProducts(); }, [fetchProducts]);
-  useEffect(() => { fetchCategories(); }, [fetchCategories]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchProducts();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchProducts]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchCategories();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchCategories]);
 
   const openCreate = () => {
     setEditingProduct(null);

@@ -30,10 +30,10 @@ async def get_all_products(
         stmt = stmt.where(Category.id == category_id)
 
     if search is not None:
-        stmt = stmt.where(Category.name.like(f"%{search}%"))
+        stmt = stmt.where(Product.name.ilike(f"%{search}%"))
 
     rez = await db.scalars(stmt)
-    return rez
+    return rez.all()
 
 
 @product_router.get("/{product_id}", response_model=ProductRelDTO)

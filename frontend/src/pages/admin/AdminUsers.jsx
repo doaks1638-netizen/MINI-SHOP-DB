@@ -3,7 +3,7 @@ import { api } from '../../api/client';
 import { useToast } from '../../context/ToastContext';
 import Pagination from '../../components/Pagination';
 import Loader from '../../components/Loader';
-import { HiOutlineTrash } from 'react-icons/hi';
+
 import './AdminPages.css';
 
 export default function AdminUsers() {
@@ -24,7 +24,12 @@ export default function AdminUsers() {
     }
   }, [page, toast]);
 
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchUsers();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchUsers]);
 
   if (loading) return <Loader size="lg" text="Загрузка пользователей..." />;
 

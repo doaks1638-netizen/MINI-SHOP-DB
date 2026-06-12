@@ -23,7 +23,12 @@ export default function AdminCarts() {
     }
   }, [page, toast]);
 
-  useEffect(() => { fetchCarts(); }, [fetchCarts]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchCarts();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchCarts]);
 
   if (loading) return <Loader size="lg" text="Загрузка корзин..." />;
 

@@ -90,7 +90,17 @@ async function apiRequest(endpoint, options = {}) {
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: 'Request failed' }));
-    throw new Error(error.detail || `HTTP ${res.status}`);
+    let msg = `HTTP ${res.status}`;
+    if (error && typeof error === 'object') {
+      if (Array.isArray(error.detail)) {
+        msg = error.detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+      } else if (error.detail) {
+        msg = String(error.detail);
+      } else if (error.message) {
+        msg = String(error.message);
+      }
+    }
+    throw new Error(msg);
   }
 
   return res.json();

@@ -28,7 +28,7 @@ export default function HomePage() {
       if (search) url += `&search=${encodeURIComponent(search)}`;
       const data = await api.get(url);
       setProducts(data);
-    } catch (err) {
+    } catch {
       toast.error('Ошибка загрузки товаров');
     } finally {
       setLoading(false);
@@ -45,11 +45,17 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    fetchCategories();
+    const timer = setTimeout(() => {
+      fetchCategories();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchCategories]);
 
   useEffect(() => {
-    fetchProducts();
+    const timer = setTimeout(() => {
+      fetchProducts();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchProducts]);
 
   const handleAddToCart = async (product) => {

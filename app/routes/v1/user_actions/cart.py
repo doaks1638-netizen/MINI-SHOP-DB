@@ -52,7 +52,7 @@ async def create_new_cart(
     await update_amount(db, item.product_id, -item.amount)
     stmt = insert(CartItem).values(**item.model_dump(), user_id=user.id)
     stmt = stmt.on_conflict_do_update(
-        constraint="cart_user_product_pk",
+        index_elements=["user_id", "product_id"],
         set_=dict(amount=CartItem.amount + stmt.excluded.amount),
     )
     stmt = stmt.returning(CartItem)

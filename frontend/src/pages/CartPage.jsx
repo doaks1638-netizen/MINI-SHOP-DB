@@ -30,7 +30,10 @@ export default function CartPage() {
   }, [page, toast]);
 
   useEffect(() => {
-    fetchCart();
+    const timer = setTimeout(() => {
+      fetchCart();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchCart]);
 
   const handleChangeAmount = async (productId, newAmount) => {

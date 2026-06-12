@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api, getTokens, setTokens, clearTokens } from '../api/client';
 
@@ -28,7 +29,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    fetchUser();
+    const timer = setTimeout(() => {
+      fetchUser();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchUser]);
 
   const login = useCallback((accessToken, refreshToken) => {
