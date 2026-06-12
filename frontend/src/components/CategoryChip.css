@@ -1,0 +1,25 @@
+.category-chip {
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--glass-bg);
+  border: var(--border-subtle);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.category-chip:hover {
+  color: var(--text-primary);
+  border-color: rgba(139, 92, 246, 0.3);
+  background: var(--glass-hover);
+}
+
+.category-chip-active {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--accent-violet);
+  border-color: rgba(139, 92, 246, 0.3);
+  font-weight: 600;
+}

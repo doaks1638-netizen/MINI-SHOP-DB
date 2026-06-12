@@ -4,7 +4,6 @@ from .order import (
     OrderCreate,
     OrderDTO,
     OrderPatch,
-    OrderStatus,
     OrderStatusEdit,
     OrderRelDTO,
 )
@@ -30,7 +29,6 @@ __all__ = [
     "OrderCreate",
     "OrderDTO",
     "OrderPatch",
-    "OrderStatus",
     "OrderStatusEdit",
     "OrderRelDTO",
     "ProductCreate",

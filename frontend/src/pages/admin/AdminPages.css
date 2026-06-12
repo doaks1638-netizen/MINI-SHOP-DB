@@ -1,0 +1,88 @@
+/* --- Admin pages shared styles --- */
+.admin-page {
+  /* Base */
+}
+
+.admin-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-lg);
+}
+
+.admin-dash-card {
+  padding: var(--space-xl);
+  text-decoration: none;
+}
+
+.admin-dash-card h3 {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+}
+
+.admin-dash-card p {
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+}
+
+.admin-dash-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-md);
+}
+
+.admin-icon-violet { background: rgba(139, 92, 246, 0.15); color: var(--accent-violet); }
+.admin-icon-cyan { background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); }
+.admin-icon-amber { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
+.admin-icon-green { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+.admin-icon-pink { background: rgba(236, 72, 153, 0.15); color: var(--accent-pink); }
+
+.admin-card-violet:hover { border-color: rgba(139, 92, 246, 0.3); box-shadow: 0 0 30px rgba(139, 92, 246, 0.1); }
+.admin-card-cyan:hover { border-color: rgba(6, 182, 212, 0.3); box-shadow: 0 0 30px rgba(6, 182, 212, 0.1); }
+.admin-card-amber:hover { border-color: rgba(245, 158, 11, 0.3); box-shadow: 0 0 30px rgba(245, 158, 11, 0.1); }
+.admin-card-green:hover { border-color: rgba(16, 185, 129, 0.3); box-shadow: 0 0 30px rgba(16, 185, 129, 0.1); }
+.admin-card-pink:hover { border-color: rgba(236, 72, 153, 0.3); box-shadow: 0 0 30px rgba(236, 72, 153, 0.1); }
+
+/* Admin toolbar */
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.admin-toolbar-left {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+/* Admin form */
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.admin-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 480px) {
+  .admin-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -147,7 +147,7 @@ async def refresh_tokens(db: DBsession, refresh_token: RefreshToken):
 
 @auth_router.delete("/logout", status_code=204, tags=["AUTHENTICATION"])
 async def delete_user_session(db: DBsession, refresh_token: RefreshToken):
-    _, session_id, *_ = decode_refresh_token(refresh_token.token)
+    _, session_id, *_ = decode_refresh_token(refresh_token)
     session = await db.scalar(
         select(UserSession).where(
             UserSession.id == UUID(session_id), UserSession.is_active == True

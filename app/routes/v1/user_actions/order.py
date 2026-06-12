@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.database import DBsession
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.orm import selectinload
 from app.models.order import Order
 from app.models.product import Product
@@ -26,6 +26,10 @@ async def create_order(
     product = await db.scalar(
         select(Product).where(Product.id == order.product_id, Product.is_active == True)
     )
+
+    if not product:
+        raise HTTPException(404, detail="Product not found")
+
     actual_price = product.price
 
     new_order = Order(user_id=user.id, price_for_one=actual_price, **order.model_dump())
@@ -70,6 +74,7 @@ async def delete_my_order(
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     order.status = OrderStatus.cancelled
+    await update_amount(db, order.product_id, order.amount)
     await debit_funds(db, order.user_id, (order.price_for_one * order.amount))
     await db.commit()
 
@@ -87,8 +92,10 @@ async def create_order_from_cart(
     for item in cart_items:
         await create_order(
             db,
-            OrderCreate(
-                user_id=user.id, product_id=item.product_id, amount=item.amount
-            ),
+            OrderCreate(product_id=item.product_id, amount=item.amount),
             user=user,
         )
+    await db.execute(delete(CartItem).where(CartItem.user_id == user.id))
+
+    # This is how deletion was intended;
+    # the server simply has no reason to store past items in the user's shopping cart.

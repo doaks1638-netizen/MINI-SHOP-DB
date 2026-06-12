@@ -1,0 +1,67 @@
+.order-card {
+  padding: var(--space-lg);
+}
+
+.order-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.order-card-id {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.order-label {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.order-id-text {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  font-family: monospace;
+  color: var(--text-accent);
+}
+
+.order-card-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md) var(--space-xl);
+  margin-bottom: var(--space-md);
+}
+
+.order-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.order-detail-label {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+}
+
+.order-detail-value {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.order-card-actions {
+  display: flex;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: var(--border-subtle);
+}
+
+.order-status-select {
+  padding: 6px 10px;
+  font-size: var(--font-xs);
+  max-width: 180px;
+}
