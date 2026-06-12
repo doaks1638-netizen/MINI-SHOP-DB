@@ -20,7 +20,7 @@ export default function CartPage() {
   const fetchCart = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get(`/cart/me?page=${page}`);
+      const data = await api.get(`/cart/?page=${page}`);
       
       const detailedItems = await Promise.all(data.map(async (item) => {
         try {
@@ -40,15 +40,12 @@ export default function CartPage() {
   }, [page, toast]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchCart();
-    }, 0);
-    return () => clearTimeout(timer);
+    fetchCart();
   }, [fetchCart]);
 
   const handleChangeAmount = async (productId, newAmount) => {
     try {
-      await api.patch(`/cart/me/products/${productId}`, { new_amount: newAmount });
+      await api.patch(`/cart/products/${productId}`, { new_amount: newAmount });
       setItems(prev => prev.map(i => i.product_id === productId ? { ...i, amount: newAmount } : i));
       toast.success('Количество обновлено');
     } catch (err) {
@@ -58,7 +55,7 @@ export default function CartPage() {
 
   const handleRemove = async (productId) => {
     try {
-      await api.delete(`/cart/me/products/${productId}`);
+      await api.delete(`/cart/products/${productId}`);
       setItems(prev => prev.filter(i => i.product_id !== productId));
       toast.success('Товар удалён из корзины');
     } catch (err) {
@@ -81,6 +78,9 @@ export default function CartPage() {
     }
   };
 
+  const totalAmount = items.reduce((sum, item) => sum + (item.product ? item.product.price * item.amount : 0), 0);
+  const hasOutOfStock = items.some(item => item.status === 'out_of_stock' || (item.product && item.product.now_amount < item.amount));
+
   if (loading) return <Loader size="lg" text="Загрузка корзины..." />;
 
   return (
@@ -102,20 +102,20 @@ export default function CartPage() {
           </button>
         </div>
       ) : (
-        <>
+        <div className="cart-layout">
           <div className="cart-items stagger">
             {items.map(item => (
-              <div key={item.product_id} className="cart-item card" id={`cart-item-${item.product_id}`}>
+              <div key={item.product_id} className={`cart-item card ${item.status === 'out_of_stock' ? 'out-of-stock-item' : ''}`} id={`cart-item-${item.product_id}`}>
                 <div className="cart-item-icon">
                   <HiOutlineShoppingCart size={24} />
                 </div>
-                <div className="cart-item-info" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <div className="cart-item-info">
                   {item.product ? (
                     <>
-                      <span className="cart-item-id" style={{ fontWeight: 600, fontSize: '1.1rem' }}>{item.product.name}</span>
-                      <span className="cart-item-price" style={{ color: 'var(--text-secondary)' }}>₽{Number(item.product.price).toLocaleString('ru-RU')}</span>
-                      {(item.product.now_amount === 0 || item.product.now_amount < item.amount) && (
-                        <span className="cart-item-error" style={{ color: 'var(--accent-red)', fontWeight: 'bold', fontSize: '0.9rem', marginTop: '4px' }}>
+                      <span className="cart-item-id" style={{ fontWeight: 600, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{item.product.name}</span>
+                      <span className="cart-item-price" style={{ color: 'var(--accent-cyan)', fontWeight: 500 }}>₽{Number(item.product.price).toLocaleString('ru-RU')}</span>
+                      {(item.status === 'out_of_stock' || item.product.now_amount < item.amount) && (
+                        <span className="cart-item-error" style={{ color: 'var(--accent-red)', fontWeight: 'bold', fontSize: '0.85rem', marginTop: '4px', display: 'block' }}>
                           ВНИМАНИЕ: Нет в наличии или недостаточно на складе!
                         </span>
                       )}
@@ -138,6 +138,7 @@ export default function CartPage() {
                   <button
                     className="btn btn-secondary btn-icon btn-sm"
                     onClick={() => handleChangeAmount(item.product_id, item.amount + 1)}
+                    disabled={item.status === 'out_of_stock'}
                   >
                     <HiOutlinePlus size={14} />
                   </button>
@@ -151,21 +152,38 @@ export default function CartPage() {
                 </button>
               </div>
             ))}
+            <Pagination page={page} onPageChange={setPage} hasMore={items.length === 30} />
           </div>
 
-          <div className="cart-footer">
+          <div className="cart-summary glass-strong animate-slideInRight">
+            <h3 style={{ marginBottom: '16px' }}>Сумма заказа</h3>
+            <div className="summary-row">
+              <span>Товары ({items.reduce((sum, item) => sum + item.amount, 0)})</span>
+              <span>₽{totalAmount.toLocaleString('ru-RU')}</span>
+            </div>
+            <div className="summary-divider"></div>
+            <div className="summary-total">
+              <span>Итого</span>
+              <span className="gradient-text">₽{totalAmount.toLocaleString('ru-RU')}</span>
+            </div>
+            
+            {hasOutOfStock && (
+              <div className="summary-warning">
+                Некоторые товары недоступны в нужном количестве. Оформление заказа может быть отменено.
+              </div>
+            )}
+
             <button
-              className="btn btn-primary btn-lg"
+              className="btn btn-primary btn-lg w-full"
               onClick={handleOrderAll}
-              disabled={orderingAll}
+              disabled={orderingAll || items.length === 0}
               id="order-all-btn"
+              style={{ marginTop: '24px', width: '100%' }}
             >
-              {orderingAll ? 'Оформление...' : 'Оформить все заказы'}
+              {orderingAll ? 'Оформление...' : 'Оформить заказ'}
             </button>
           </div>
-
-          <Pagination page={page} onPageChange={setPage} hasMore={items.length === 30} />
-        </>
+        </div>
       )}
     </div>
   );

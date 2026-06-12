@@ -41,7 +41,7 @@ export default function ProductPage() {
   const handleAddToCart = async () => {
     if (!requireAuth()) return;
     try {
-      await api.post('/cart', { product_id: product.id, amount });
+      await api.post('/cart/', { product_id: product.id, amount });
       toast.success(`${product.name} добавлен в корзину (${amount} шт.)`);
     } catch (err) {
       toast.error(err.message);

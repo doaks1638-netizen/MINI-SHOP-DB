@@ -17,7 +17,17 @@ export default function OrdersPage() {
     setLoading(true);
     try {
       const data = await api.get(`/users/me/orders?page=${page}`);
-      setOrders(data);
+      
+      const detailedOrders = await Promise.all(data.map(async (order) => {
+        try {
+          const product = await api.get(`/products/${order.product_id}`);
+          return { ...order, product };
+        } catch {
+          return { ...order, product: null };
+        }
+      }));
+      
+      setOrders(detailedOrders);
     } catch {
       toast.error('Ошибка загрузки заказов');
     } finally {
@@ -26,10 +36,7 @@ export default function OrdersPage() {
   }, [page, toast]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchOrders();
-    }, 0);
-    return () => clearTimeout(timer);
+    fetchOrders();
   }, [fetchOrders]);
 
   const handleCancel = async (orderId) => {
@@ -62,7 +69,7 @@ export default function OrdersPage() {
         </div>
       ) : (
         <>
-          <div className="stagger" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          <div className="stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 'var(--space-md)' }}>
             {orders.map(order => (
               <OrderCard key={order.id} order={order} onCancel={handleCancel} />
             ))}

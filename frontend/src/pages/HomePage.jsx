@@ -65,7 +65,7 @@ export default function HomePage() {
       return;
     }
     try {
-      await api.post('/cart', { product_id: product.id, amount: 1 });
+      await api.post('/cart/', { product_id: product.id, amount: 1 });
       toast.success(`${product.name} добавлен в корзину`);
     } catch (err) {
       toast.error(err.message || 'Ошибка добавления в корзину');
