@@ -57,7 +57,14 @@ async function refreshTokens() {
 
 async function apiRequest(endpoint, options = {}) {
   const { access } = getTokens();
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+  const url = endpoint.startsWith('http') ? endpoint : `
+
+
+  API ASE
+  B
+
+
+    {endpoint}`;
 
   const headers = {
     ...options.headers,
@@ -87,10 +94,20 @@ async function apiRequest(endpoint, options = {}) {
   }
 
   if (res.status === 204) return null;
+  if (Array.isArray(error.detail)) {
+    msg = error.detail.map(e => e.msg || JSON.stringify(e)).join(', ');
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ detail: 'Request failed' }));
-    throw new Error(error.detail || `HTTP ${res.status}`);
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ detail: 'Request failed' }));
+      let msg = `HTTP ${res.status}`;
+      if (error && typeof error === 'object') {
+      } else if (error.detail) {
+        msg = String(error.detail);
+      } else if (error.message) {
+        msg = String(error.message);
+      }
+    }
+    throw new Error(msg);
   }
 
   return res.json();

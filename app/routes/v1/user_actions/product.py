@@ -33,7 +33,7 @@ async def get_all_products(
         stmt = stmt.where(Category.name.like(f"%{search}%"))
 
     rez = await db.scalars(stmt)
-    return rez
+    return rez.all()
 
 
 @product_router.get("/{product_id}", response_model=ProductRelDTO)
