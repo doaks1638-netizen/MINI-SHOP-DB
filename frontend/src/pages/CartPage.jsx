@@ -21,7 +21,17 @@ export default function CartPage() {
     setLoading(true);
     try {
       const data = await api.get(`/cart/me?page=${page}`);
-      setItems(data);
+      
+      const detailedItems = await Promise.all(data.map(async (item) => {
+        try {
+          const product = await api.get(`/products/${item.product_id}`);
+          return { ...item, product };
+        } catch {
+          return { ...item, product: null };
+        }
+      }));
+
+      setItems(detailedItems);
     } catch {
       toast.error('Ошибка загрузки корзины');
     } finally {
@@ -99,10 +109,22 @@ export default function CartPage() {
                 <div className="cart-item-icon">
                   <HiOutlineShoppingCart size={24} />
                 </div>
-                <div className="cart-item-info">
-                  <span className="cart-item-id" title={item.product_id}>
-                    Товар #{item.product_id.slice(0, 8)}
-                  </span>
+                <div className="cart-item-info" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  {item.product ? (
+                    <>
+                      <span className="cart-item-id" style={{ fontWeight: 600, fontSize: '1.1rem' }}>{item.product.name}</span>
+                      <span className="cart-item-price" style={{ color: 'var(--text-secondary)' }}>₽{Number(item.product.price).toLocaleString('ru-RU')}</span>
+                      {(item.product.now_amount === 0 || item.product.now_amount < item.amount) && (
+                        <span className="cart-item-error" style={{ color: 'var(--accent-red)', fontWeight: 'bold', fontSize: '0.9rem', marginTop: '4px' }}>
+                          ВНИМАНИЕ: Нет в наличии или недостаточно на складе!
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="cart-item-id" title={item.product_id}>
+                      Товар #{item.product_id.slice(0, 8)} (Недоступен)
+                    </span>
+                  )}
                 </div>
                 <div className="cart-item-amount">
                   <button

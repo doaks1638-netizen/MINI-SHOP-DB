@@ -2,6 +2,7 @@ dialog.modal {
   border: none;
   background: transparent;
   padding: 0;
+  margin: auto;
   max-width: 90vw;
   max-height: 90vh;
   overflow: visible;
