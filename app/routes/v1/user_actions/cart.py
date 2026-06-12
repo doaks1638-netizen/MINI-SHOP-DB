@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import insert
 from app.models.cart_item import CartItem
 from app.schemas import CartItemDTO
 from app.database import DBsession
-from app.services import check_user_product_exists, update_amount
+from app.services import check_user_product_exists
 from typing import Annotated
 from uuid import UUID
 from app.routes import page_number
@@ -49,7 +49,6 @@ async def get_user_cart(
 async def create_new_cart(
     db: DBsession, item: CartItemDTO, user: Annotated[User, Depends(get_current_user)]
 ):
-    await update_amount(db, item.product_id, -item.amount)
     stmt = insert(CartItem).values(**item.model_dump(), user_id=user.id)
     stmt = stmt.on_conflict_do_update(
         index_elements=["user_id", "product_id"],
@@ -72,10 +71,6 @@ async def change_product_amount(
     product_id: UUID,
 ):
     cart_item = await check_user_product_exists(db, user.id, product_id)
-    old_amount = cart_item.amount
-    diff = new_amount - old_amount
-    await update_amount(db, product_id, -diff)
-
     cart_item.amount = new_amount
 
     await db.commit()
@@ -89,8 +84,6 @@ async def delete_product_from_cart(
     db: DBsession, user: Annotated[User, Depends(get_current_user)], product_id: UUID
 ):
     cart_item = await check_user_product_exists(db, user.id, product_id)
-    old_amount = cart_item.amount
-    await update_amount(db, product_id, old_amount)
 
     await db.delete(cart_item)
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 from app.models.order import Order
 from app.models.product import Product
 from app.models.order_status_enum import OrderStatus
-from app.services import update_amount, debit_funds
+from app.services import debit_funds
 from app.schemas import OrderCreate, OrderDTO, OrderRelDTO
 from app.models.user import User
 from app.models.cart_item import CartItem
@@ -34,8 +34,6 @@ async def create_order(
 
     new_order = Order(user_id=user.id, price_for_one=actual_price, **order.model_dump())
     db.add(new_order)
-
-    await update_amount(db, order.product_id, -order.amount)
 
     await debit_funds(db, user.id, -(actual_price * order.amount))
 
@@ -74,7 +72,6 @@ async def delete_my_order(
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     order.status = OrderStatus.cancelled
-    await update_amount(db, order.product_id, order.amount)
     await debit_funds(db, order.user_id, (order.price_for_one * order.amount))
     await db.commit()
 
@@ -95,7 +92,9 @@ async def create_order_from_cart(
             OrderCreate(product_id=item.product_id, amount=item.amount),
             user=user,
         )
-    await db.execute(delete(CartItem).where(CartItem.user_id == user.id))
+        await db.execute(delete(CartItem).where(CartItem.user_id == user.id))
+
+    await db.commit()
 
     # This is how deletion was intended;
     # the server simply has no reason to store past items in the user's shopping cart.
