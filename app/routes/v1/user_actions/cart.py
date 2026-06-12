@@ -31,7 +31,7 @@ async def get_user_cart(
             CartItem.product_id,
             CartItem.amount,
             case(
-                (CartItem.product_id >= Product.now_amount, CartItemStatus.in_stock),
+                (CartItem.amount <= Product.now_amount, CartItemStatus.in_stock),
                 else_=CartItemStatus.out_of_stock,
             ).label("status"),
         )
@@ -65,6 +65,7 @@ async def create_new_cart(
     stmt = stmt.returning(CartItem)
     rez = await db.scalar(stmt)
     await db.commit()
+    await db.refresh(rez)
     return rez
 
 
