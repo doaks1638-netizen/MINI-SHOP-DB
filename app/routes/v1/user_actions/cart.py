@@ -31,7 +31,7 @@ async def get_user_cart(
             CartItem.product_id,
             CartItem.amount,
             case(
-                (CartItem.amount <= Product.now_amount, CartItemStatus.in_stock),
+                (Product.now_amount >= CartItem.amount, CartItemStatus.in_stock),
                 else_=CartItemStatus.out_of_stock,
             ).label("status"),
         )
@@ -64,9 +64,9 @@ async def create_new_cart(
     )
     stmt = stmt.returning(CartItem)
     rez = await db.scalar(stmt)
+    result_dto = CartItemDTO.model_validate(rez)
     await db.commit()
-    await db.refresh(rez)
-    return rez
+    return result_dto
 
 
 @cart_router.patch(
