@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Body, Depends, Query
-from sqlalchemy import select
+from sqlalchemy import select, case
 from sqlalchemy.dialects.postgresql import insert
 from app.models.cart_item import CartItem
-from app.schemas import CartItemDTO
+from app.schemas import CartItemDTO, CartItemWithStatus, CartItemStatus
 from app.database import DBsession
 from app.services import check_user_product_exists
 from typing import Annotated
@@ -12,10 +12,10 @@ from app.models.user import User
 from app.models.product import Product
 from app.routes import get_current_user
 
-cart_router = APIRouter(tags=["CART"])
+cart_router = APIRouter(tags=["CART"], prefix="/cart")
 
 
-@cart_router.get("/cart/me", response_model=list[CartItemDTO])
+@cart_router.get("/", response_model=list[CartItemWithStatus])
 async def get_user_cart(
     db: DBsession,
     page: page_number,
@@ -26,7 +26,15 @@ async def get_user_cart(
     search: Annotated[str, Query()] = None,
 ):
     query = (
-        select(CartItem)
+        select(
+            CartItem.user_id,
+            CartItem.product_id,
+            CartItem.amount,
+            case(
+                (CartItem.product_id >= Product.now_amount, CartItemStatus.in_stock),
+                else_=CartItemStatus.out_of_stock,
+            ).label("status"),
+        )
         .join(User, CartItem.user_id == User.id)
         .join(Product, CartItem.product_id == Product.id)
         .where(User.is_active == True, Product.is_active == True)
@@ -36,16 +44,16 @@ async def get_user_cart(
     )
 
     if product_id is not None:
-        stmt = query.where(Product.id == product_id)
+        query = query.where(Product.id == product_id)
 
     if search is not None:
-        stmt = stmt.where(Product.name.like(f"%{search}%"))
+        query = query.where(Product.name.like(f"%{search}%"))
 
     rez = await db.execute(query)
-    return rez.scalars().all()
+    return rez.mappings().all()
 
 
-@cart_router.post("/cart", status_code=201, response_model=CartItemDTO)
+@cart_router.post("/", status_code=201, response_model=CartItemDTO)
 async def create_new_cart(
     db: DBsession, item: CartItemDTO, user: Annotated[User, Depends(get_current_user)]
 ):
@@ -61,7 +69,7 @@ async def create_new_cart(
 
 
 @cart_router.patch(
-    "/cart/me/products/{product_id}",
+    "/products/{product_id}",
     status_code=204,
 )
 async def change_product_amount(
@@ -77,7 +85,7 @@ async def change_product_amount(
 
 
 @cart_router.delete(
-    "/cart/me/products/{product_id}",
+    "/products/{product_id}",
     status_code=204,
 )
 async def delete_product_from_cart(

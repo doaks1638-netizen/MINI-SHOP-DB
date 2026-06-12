@@ -1,4 +1,4 @@
-from .cart_item import CartItemDTO, Cart
+from .cart_item import CartItemDTO, Cart, CartItemWithStatus, CartItemStatus
 from .categories import CategoryCreate, CategoryDTO, CategoryRelDTO
 from .order import (
     OrderCreate,
@@ -45,4 +45,6 @@ __all__ = [
     "NewBalance",
     "TokenResponse",
     "RefreshToken",
+    "CartItemWithStatus",
+    "CartItemStatus",
 ]
