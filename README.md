@@ -66,3 +66,8 @@ uv run fastapi dev app/main.py
 │   ├── database.py # DB connection & session
 │   └── main.py     # FastAPI application entry point
 ```
+
+## Start Command 
+
+Back: uvicorn app.routes.app:app --reload
+Front: cd frontend && npm run dev
