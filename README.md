@@ -26,9 +26,11 @@ API будет доступно по адресу: http://localhost:8000
 
 Убедитесь, что у вас установлен Node.js.
 
+```bash
 cd frontend
 npm install
 npm run dev
+```
 
 Интерфейс будет доступен по адресу: http://localhost:5173
 
