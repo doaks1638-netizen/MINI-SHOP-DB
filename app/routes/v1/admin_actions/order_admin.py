@@ -9,7 +9,7 @@ from app.services import update_amount, debit_funds
 from app.schemas import OrderDTO, OrderStatusEdit, OrderRelDTO
 from uuid import UUID
 from app.routes import page_number
-from app.routes.dependencies import get_current_admin
+from app.routes import get_current_admin
 
 admin_order_router = APIRouter(
     prefix="/admin/orders", tags=["ADMIN"], dependencies=[Depends(get_current_admin)]
@@ -31,7 +31,9 @@ async def get_all_orders(db: DBsession, page: page_number):
 
 @admin_order_router.get("/{order_id}", response_model=OrderRelDTO)
 async def get_order_info(db: DBsession, order_id: UUID):
-    stmt = select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
+    stmt = (
+        select(Order).options(selectinload(Order.product)).where(Order.id == order_id)
+    )
     order = await db.scalar(stmt)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -58,7 +60,6 @@ async def change_order(db: DBsession, new_status: OrderStatusEdit, order_id: UUI
 async def delete_order(db: DBsession, order_id: UUID):
     stmt = (
         select(Order)
-        .options(selectinload(Order.items))
         .join(User, User.id == Order.user_id)
         .where(User.is_active == True)
         .where(Order.id == order_id)
@@ -66,9 +67,7 @@ async def delete_order(db: DBsession, order_id: UUID):
     order = await db.scalar(stmt)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    for order_item in order.items:
-        await update_amount(db, order_item.product_id, order_item.amount)
     order.status = OrderStatus.cancelled
-    await debit_funds(db, order.user_id, order.total_price)
+    await update_amount(db, order.product_id, order.amount)
+    await debit_funds(db, order.user_id, (order.price_for_one * order.amount))
     await db.commit()
-

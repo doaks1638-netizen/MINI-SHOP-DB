@@ -15,8 +15,3 @@ class ProductShare(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class OrderItemShare(BaseModel):
-    product_id: UUID
-    amount: Annotated[int, Field(gt=0)]
-    order_id: UUID
-    price_for_one: Annotated[Decimal, Field(ge=0)]

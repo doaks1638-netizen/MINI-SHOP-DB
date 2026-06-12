@@ -5,7 +5,7 @@ from app.schemas import CategoryDTO, CategoryCreate
 from app.models.categories import Category
 from typing import Annotated
 from uuid import UUID
-from app.routes.dependencies import get_current_admin
+from app.routes import get_current_admin
 
 admin_category_router = APIRouter(
     prefix="/admin/categories",

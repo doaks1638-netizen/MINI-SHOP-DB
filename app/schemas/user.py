@@ -2,17 +2,14 @@ from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
-from app.models import CreatorUserRole, UserRole
+from app.models import UserRole, CreatorUserRole
 
 
 class UserCreate(BaseModel):
-    name: Annotated[str, Field(max_length=100)]
+    google_id: str
+    name: Annotated[str, Field(max_length=256)]
     email: EmailStr
-    password: Annotated[str, Field(min_length=8)]
-
-
-class FullUserCreate(UserCreate):
-    role: UserRole = CreatorUserRole.admin
+    picture: str
 
 
 class UserDTO(BaseModel):
@@ -21,6 +18,7 @@ class UserDTO(BaseModel):
     email: EmailStr
     balance: Annotated[Decimal, Field(ge=0)]
     role: UserRole
+    picture: str
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -31,7 +29,16 @@ class UserDTOCount(BaseModel):
 
 class UserPatch(BaseModel):
     name: Annotated[str, Field(max_length=100)]
+    picture: str
 
 
 class UserPatchRole(BaseModel):
-    role: UserRole
+    role: CreatorUserRole
+
+
+class BalanceUpdate(BaseModel):
+    update_amount: Annotated[Decimal, Field(ge=0, le=10000000)]
+
+
+class NewBalance(BaseModel):
+    balance: Decimal

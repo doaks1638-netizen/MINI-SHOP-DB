@@ -5,7 +5,7 @@ from app.models.categories import Category
 from app.schemas import ProductCreate, ProductPatch
 from sqlalchemy import select, and_, insert, update
 from uuid import UUID
-from app.routes.dependencies import get_current_admin
+from app.routes import get_current_admin
 
 admin_product_router = APIRouter(
     prefix="/admin/products", tags=["ADMIN"], dependencies=[Depends(get_current_admin)]

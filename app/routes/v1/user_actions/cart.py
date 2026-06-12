@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from app.models.cart_item import CartItem
@@ -10,14 +10,20 @@ from uuid import UUID
 from app.routes import page_number
 from app.models.user import User
 from app.models.product import Product
-from app.routes.dependencies import get_current_user
+from app.routes import get_current_user
 
 cart_router = APIRouter(tags=["CART"])
 
 
 @cart_router.get("/cart/me", response_model=list[CartItemDTO])
 async def get_user_cart(
-    db: DBsession, page: page_number, user: Annotated[User, Depends(get_current_user)]
+    db: DBsession,
+    page: page_number,
+    user: Annotated[User, Depends(get_current_user)],
+    product_id: Annotated[
+        UUID, Query()
+    ] = None,  # выборка товаров (если в корзине много товаров)
+    search: Annotated[str, Query()] = None,
 ):
     query = (
         select(CartItem)
@@ -28,6 +34,13 @@ async def get_user_cart(
         .limit(30)
         .offset(30 * (page - 1))
     )
+
+    if product_id is not None:
+        stmt = query.where(Product.id == product_id)
+
+    if search is not None:
+        stmt = stmt.where(Product.name.like(f"%{search}%"))
+
     rez = await db.execute(query)
     return rez.scalars().all()
 

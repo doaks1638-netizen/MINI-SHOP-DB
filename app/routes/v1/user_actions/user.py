@@ -1,16 +1,12 @@
 from fastapi import APIRouter, Depends
 from app.database import DBsession
 from app.routes import page_number
-from app.schemas import (
-    UserPatch,
-    UserDTO,
-    OrderDTO,
-)
+from app.schemas import UserPatch, UserDTO, OrderDTO, BalanceUpdate, NewBalance
 from app.models.user import User
 from app.models.order import Order
 from sqlalchemy import select
 from typing import Annotated
-from app.routes.dependencies import get_current_user
+from app.routes import get_current_user
 
 user_router = APIRouter(prefix="/users", tags=["USERS"])
 
@@ -27,6 +23,7 @@ async def change_my_profile(
     user: Annotated[User, Depends(get_current_user)],
 ):
     user.name = new_profile.name
+    user.picture = new_profile.picture
     await db.commit()
     await db.refresh(user)
 
@@ -46,10 +43,22 @@ async def get_user_orders(
     user: Annotated[User, Depends(get_current_user)],
 ):
     orders_stmt = (
-        select(Order)
-        .where(Order.user_id == user.id)
-        .limit(30)
-        .offset(30 * (page - 1))
+        select(Order).where(Order.user_id == user.id).limit(30).offset(30 * (page - 1))
     )
     orders = await db.scalars(orders_stmt)
     return orders
+
+
+@user_router.post("/me/balance", response_model=NewBalance)
+async def update_balance(
+    db: DBsession,
+    update_schema: BalanceUpdate,
+    user: Annotated[User, Depends(get_current_user)],
+):
+    """
+    For now, the scheme is implemented with any amount of money; the YUKassa API will be added later.
+    Stay tuned for updates!
+    """
+    user.balance += update_schema.update_amount
+    await db.commit()
+    return NewBalance(balance=user.balance)

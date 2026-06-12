@@ -9,7 +9,7 @@ from uuid import UUID
 from app.routes import page_number
 from app.models.user import User
 from app.models.product import Product
-from app.routes.dependencies import get_current_admin
+from app.routes import get_current_admin
 admin_cart_router = APIRouter(
     prefix="/admin/cart", dependencies=[Depends(get_current_admin)], tags=["ADMIN"]
 )

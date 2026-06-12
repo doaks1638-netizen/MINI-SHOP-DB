@@ -12,7 +12,7 @@ import jwt
 page_number = Annotated[int, Query(gt=0)]
 
 
-oauth_scheme = OAuth2PasswordBearer("/api/v1/auth/token")
+oauth_scheme = OAuth2PasswordBearer("/api/v1/auth/google/login")
 
 exc = HTTPException(
     401,

@@ -1,7 +1,6 @@
 from sqlalchemy import select, func
 from app.models.session import UserSession
 from app.settings import settings
-from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -12,4 +11,12 @@ async def check_session_limit(db: AsyncSession, user_id):
         )
     )
     if count_of_user_sessions >= settings.MAX_USER_SESSION:
-        raise HTTPException(429, detail="Too many sessions for one user")
+        oldest_sessions = await db.scalars(
+            select(UserSession)
+            .where(UserSession.user_id == user_id, UserSession.is_active == True)
+            .order_by(UserSession.expiration_time)
+            .limit(count_of_user_sessions - settings.MAX_USER_SESSION + 1)
+        )
+        for session in oldest_sessions:
+            session.is_active = False
+        await db.flush()

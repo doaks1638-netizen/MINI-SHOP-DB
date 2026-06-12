@@ -25,6 +25,10 @@ class Settings(BaseSettings):
 
     MAX_USER_SESSION: int = 10
 
+    CLIENT_SECRET: str
+    CLIENT_ID: str
+    REDIRECT_URL: str = "http://localhost:8000/api/v1/auth/google/callback"
+
     model_config = SettingsConfigDict(
         extra="ignore",
         env_file=parent_path / ".env",

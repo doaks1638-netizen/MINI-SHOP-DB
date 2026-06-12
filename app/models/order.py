@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from decimal import Decimal
 
 if TYPE_CHECKING:
-    from app.models.order_item import OrderItem
+    from app.models.product import Product
 
 
 class Order(Base):
@@ -20,10 +20,14 @@ class Order(Base):
         DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP")
     )
     status: Mapped["OrderStatus"] = mapped_column(
-        Enum(OrderStatus, native_enum=False), default=OrderStatus.created
+        Enum(OrderStatus, native_enum=False),
+        default=OrderStatus.created,
+        server_default="created",
     )
-    total_price: Mapped[Decimal] = mapped_column(
+    price_for_one: Mapped[Decimal] = mapped_column(
         Numeric(10, 2), server_default=text("0")
     )
+    product_id: Mapped[UUID] = mapped_column(ForeignKey("products.id"))
+    amount: Mapped[int]
 
-    items: Mapped[list["OrderItem"]] = relationship()
+    product: Mapped['Product'] = relationship()
