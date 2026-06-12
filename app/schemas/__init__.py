@@ -30,6 +30,5 @@ __all__ = [
     "OrderRelDTO",
     "TokenResponse",
     "RefreshToken",
-    "CartItem",
     "FullUserCreate",
 ]

@@ -5,7 +5,7 @@ from sqlalchemy import select
 from typing import Annotated
 from app.database import DBsession
 from app.models.user import User
-from app.models.user_role_enum import UserRole
+from app.models import UserRole
 from app.settings import settings
 import jwt
 
@@ -71,4 +71,3 @@ async def get_current_creator(
         raise role_exc
 
     return user
-

@@ -18,7 +18,7 @@ class Product(Base):
         ForeignKey("categories.id", ondelete="CASCADE")
     )
     name: Mapped[str] = mapped_column(String(100))
-    description: Mapped[str] = mapped_column(String(200), nullable=True)
+    description: Mapped[str | None] = mapped_column(String(200), nullable=True)
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     now_amount: Mapped[int]
     is_active: Mapped[active]

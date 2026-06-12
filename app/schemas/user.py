@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
-from app.models.user_role_enum import UserRole
+from app.models import CreatorUserRole, UserRole
 
 
 class UserCreate(BaseModel):
@@ -12,7 +12,7 @@ class UserCreate(BaseModel):
 
 
 class FullUserCreate(UserCreate):
-    role: UserRole = UserRole.creator
+    role: UserRole = CreatorUserRole.creator
 
 
 class UserDTO(BaseModel):

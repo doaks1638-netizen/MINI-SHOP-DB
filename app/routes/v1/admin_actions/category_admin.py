@@ -34,7 +34,7 @@ async def create_category(db: DBsession, new_category: CategoryCreate):
 
 @admin_category_router.patch(
     "/{category_id}",
-    status_code=201,
+    status_code=200,
 )
 async def change_category_name(
     db: DBsession,

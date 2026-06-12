@@ -43,8 +43,6 @@ async def registry_new_user(db: DBsession, new_user: UserCreate):
     db.add(new_user)
     await db.flush()
 
-    await check_session_limit(db=db, user_id=new_user.id)
-
     token_id = uuid7()
 
     new_session = UserSession(
@@ -71,7 +69,7 @@ async def registry_new_user(db: DBsession, new_user: UserCreate):
 
 
 @auth_router.post(
-    "/refresh", status_code=201, response_model=TokenResponse, tags=["AUTHENTICATION"]
+    "/refresh", status_code=200, response_model=TokenResponse, tags=["AUTHENTICATION"]
 )
 async def refresh_tokens(db: DBsession, refresh_token: RefreshToken):
 

@@ -4,8 +4,6 @@ from app.routes.v1 import v1_router
 
 app = FastAPI(title="MINI-SHOP-DB")
 
-app.include_router(v1_router)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -13,3 +11,5 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(v1_router)

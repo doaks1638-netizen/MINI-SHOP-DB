@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import String, Numeric, Enum
 from sqlalchemy import text, CheckConstraint, UniqueConstraint
 from decimal import Decimal
-from app.models.user_role_enum import UserRole
+from app.models import UserRole
 
 
 class User(Base):

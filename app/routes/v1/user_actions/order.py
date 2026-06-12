@@ -13,6 +13,7 @@ from app.models.user import User
 from uuid import UUID
 from typing import Annotated
 from app.routes.dependencies import get_current_user
+from decimal import Decimal
 
 order_router = APIRouter(prefix="/orders", tags=["ORDERS"])
 
@@ -50,7 +51,7 @@ async def create_order(
         )
 
     insert_data = []
-    total_order_price = 0
+    total_order_price = Decimal("0")
 
     for item in order.items:
         db_product = products[item.product_id]
@@ -69,10 +70,10 @@ async def create_order(
         insert_data.append(data)
         total_order_price += actual_price * item.amount
 
-    await debit_funds(db, user.id, -total_order_price)
-
     insert_stmt = insert(OrderItem).values(insert_data)
     new_order.total_price = total_order_price
+
+    await debit_funds(db, user.id, -total_order_price)
 
     await db.execute(insert_stmt)
     await db.commit()
@@ -102,7 +103,11 @@ async def delete_my_order(
     stmt = (
         select(Order)
         .options(selectinload(Order.items))
-        .where(Order.id == order_id, Order.user_id == user.id)
+        .where(
+            Order.id == order_id,
+            Order.user_id == user.id,
+            Order.status != OrderStatus.cancelled,
+        )
     )
     order = await db.scalar(stmt)
     if not order:

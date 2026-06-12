@@ -25,6 +25,6 @@ class ProductRelDTO(ProductDTO):
 class ProductPatch(BaseModel):
     category_id: UUID | None = None
     name: Annotated[str | None, Field(max_length=100)] = None
-    description: Annotated[str | None, Field(max_length=2000)] = None
+    description: Annotated[str | None, Field(max_length=200)] = None
     price: Annotated[Decimal | None, Field(ge=0)] = None
     now_amount: Annotated[int | None, Field(ge=0)] = None
