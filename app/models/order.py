@@ -29,5 +29,4 @@ class Order(Base):
     )
     product_id: Mapped[UUID] = mapped_column(ForeignKey("products.id"))
     amount: Mapped[int]
-
     product: Mapped['Product'] = relationship()
