@@ -38,5 +38,3 @@ npm run dev
 • Frontend: React 19, Vite, React Router DOM
 • База данных: PostgreSQL
 • Менеджер пакетов: uv (backend) / npm (frontend)
-
-Он включает в себя красивые бейджи со стеком технологий, которые я определил по вашим файлам `pyproject.toml` и `package.json`, четкие инструкции по запуску и выглядит гораздо привлекательнее на GitHub.
