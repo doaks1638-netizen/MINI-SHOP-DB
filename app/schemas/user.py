@@ -12,7 +12,7 @@ class UserCreate(BaseModel):
 
 
 class FullUserCreate(UserCreate):
-    role: UserRole = CreatorUserRole.creator
+    role: UserRole = CreatorUserRole.admin
 
 
 class UserDTO(BaseModel):
