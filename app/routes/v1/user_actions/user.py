@@ -61,5 +61,5 @@ async def update_balance(
     """
     user.balance += update_schema.update_amount
     await db.commit()
-    await db.refresh()
+    await db.refresh(user)
     return NewBalance(balance=user.balance)
