@@ -107,7 +107,20 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 export const api = {
-  get: (endpoint) => apiRequest(endpoint, { method: 'GET' }),
+  get: (endpoint, query = {}) => {
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, val]) => {
+      if (val !== undefined && val !== null) {
+        if (Array.isArray(val)) {
+          val.forEach(v => params.append(key, v));
+        } else {
+          params.append(key, val);
+        }
+      }
+    });
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return apiRequest(`${endpoint}${qs}`, { method: 'GET' });
+  },
   post: (endpoint, body) => apiRequest(endpoint, {
     method: 'POST',
     body: JSON.stringify(body),

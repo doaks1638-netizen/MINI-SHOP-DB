@@ -10,19 +10,23 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [dateFilter, setDateFilter] = useState('new');
+  const [statusFilter, setStatusFilter] = useState('');
   const toast = useToast();
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get(`/admin/orders/?page=${page}`);
+      const query = { page, date_filter: dateFilter };
+      if (statusFilter) query.status_filter = statusFilter;
+      const data = await api.get('/admin/orders/', query);
       setOrders(data);
     } catch {
       toast.error('Ошибка загрузки заказов');
     } finally {
       setLoading(false);
     }
-  }, [page, toast]);
+  }, [page, dateFilter, statusFilter, toast]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -59,7 +63,29 @@ export default function AdminOrders() {
         <h1><span className="gradient-text">Управление</span> заказами</h1>
       </div>
 
-      <div className="admin-toolbar">
+      <div className="admin-toolbar" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 'var(--space-sm)' }}>
+        <div style={{ display: 'flex', gap: 'var(--space-md)', width: '100%', maxWidth: '600px' }}>
+          <select 
+            className="input home-sort"
+            value={dateFilter}
+            onChange={(e) => { setDateFilter(e.target.value); setPage(1); }}
+          >
+            <option value="new">Сначала новые</option>
+            <option value="old">Сначала старые</option>
+          </select>
+          <select 
+            className="input home-sort"
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          >
+            <option value="">Все статусы</option>
+            <option value="created">Создан</option>
+            <option value="processing">В обработке</option>
+            <option value="delivery">Доставляется</option>
+            <option value="delivered">Доставлен</option>
+            <option value="cancelled">Отменен</option>
+          </select>
+        </div>
         <span className="badge badge-amber">{orders.length} заказов</span>
       </div>
 

@@ -12,12 +12,11 @@
 }
 
 .product-card-visual {
-  height: 140px;
+  height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--gradient-surface);
-  border-bottom: var(--border-subtle);
   position: relative;
   overflow: hidden;
 }

@@ -86,3 +86,22 @@
     align-items: stretch;
   }
 }
+
+/* Admin filters */
+.admin-filters-row {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.admin-filters-row .admin-search-input {
+  flex: 1;
+  min-width: 250px;
+}
+
+.admin-filters-row .admin-sort-select {
+  width: auto;
+  min-width: 180px;
+  flex: 0 0 auto;
+}

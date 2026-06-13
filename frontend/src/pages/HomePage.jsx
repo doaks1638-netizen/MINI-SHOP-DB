@@ -16,6 +16,7 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [priceFilter, setPriceFilter] = useState('');
   const navigate = useNavigate();
   const toast = useToast();
   const { isAuthenticated } = useAuth();
@@ -23,17 +24,18 @@ export default function HomePage() {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      let url = `/products/?page=${page}`;
-      if (selectedCategory) url += `&category_id=${selectedCategory}`;
-      if (search) url += `&search=${encodeURIComponent(search)}`;
-      const data = await api.get(url);
+      const query = { page };
+      if (selectedCategory) query.category_id = selectedCategory;
+      if (search) query.search = search;
+      if (priceFilter) query.price_filter = priceFilter;
+      const data = await api.get('/products/', query);
       setProducts(data);
     } catch {
       toast.error('Ошибка загрузки товаров');
     } finally {
       setLoading(false);
     }
-  }, [page, selectedCategory, search, toast]);
+  }, [page, selectedCategory, search, priceFilter, toast]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -87,15 +89,24 @@ export default function HomePage() {
       </div>
 
       <div className="home-filters">
-        <div className="home-search">
+        <div className="home-search-row">
           <input
             type="text"
-            className="input"
+            className="input home-search"
             placeholder="Поиск товаров..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             id="product-search"
           />
+          <select 
+            className="input home-sort"
+            value={priceFilter}
+            onChange={(e) => { setPriceFilter(e.target.value); setPage(1); }}
+          >
+            <option value="">По умолчанию</option>
+            <option value="cheaper">Сначала дешевые</option>
+            <option value="more_expensive">Сначала дорогие</option>
+          </select>
         </div>
 
         {categories.length > 0 && (

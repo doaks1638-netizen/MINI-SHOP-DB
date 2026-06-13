@@ -10,19 +10,22 @@ export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [roleFilter, setRoleFilter] = useState('');
   const toast = useToast();
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get(`/admin/users/?page=${page}`);
+      const query = { page };
+      if (roleFilter) query.roles = [roleFilter];
+      const data = await api.get('/admin/users/', query);
       setUsers(data);
     } catch {
       toast.error('Ошибка загрузки пользователей');
     } finally {
       setLoading(false);
     }
-  }, [page, toast]);
+  }, [page, roleFilter, toast]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,7 +42,17 @@ export default function AdminUsers() {
         <h1><span className="gradient-text">Управление</span> пользователями</h1>
       </div>
 
-      <div className="admin-toolbar">
+      <div className="admin-toolbar" style={{ flexDirection: 'row', alignItems: 'center', gap: 'var(--space-md)' }}>
+        <select 
+          className="input home-sort"
+          value={roleFilter}
+          onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
+        >
+          <option value="">Все роли</option>
+          <option value="user">Пользователи</option>
+          <option value="admin">Администраторы</option>
+          <option value="creator">Создатели</option>
+        </select>
         <span className="badge badge-green">{users.length} пользователей</span>
       </div>
 

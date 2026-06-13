@@ -5,8 +5,18 @@
   margin-bottom: var(--space-xl);
 }
 
+.home-search-row {
+  display: flex;
+  gap: var(--space-md);
+  max-width: 600px;
+}
+
 .home-search {
-  max-width: 400px;
+  flex: 1;
+}
+
+.home-sort {
+  width: 200px;
 }
 
 .home-categories {

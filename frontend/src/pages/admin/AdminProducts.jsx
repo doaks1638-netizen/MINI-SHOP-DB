@@ -12,6 +12,10 @@ export default function AdminProducts() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [priceFilter, setPriceFilter] = useState('');
+  const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [form, setForm] = useState({ category_id: '', name: '', description: '', price: '', now_amount: '', is_active: true });
@@ -20,14 +24,19 @@ export default function AdminProducts() {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get(`/products/?page=${page}`);
+      const query = { page };
+      if (activeFilter) query.active_filter = activeFilter;
+      if (priceFilter) query.price_filter = priceFilter;
+      if (search) query.search = search;
+      if (selectedCategory) query.category_id = selectedCategory;
+      const data = await api.get('/admin/products/', query);
       setProducts(data);
     } catch {
       toast.error('Ошибка загрузки товаров');
     } finally {
       setLoading(false);
     }
-  }, [page, toast]);
+  }, [page, activeFilter, priceFilter, search, selectedCategory, toast]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -102,8 +111,6 @@ export default function AdminProducts() {
     }
   };
 
-  if (loading) return <Loader size="lg" text="Загрузка товаров..." />;
-
   return (
     <div className="admin-page animate-fadeIn">
       <div className="page-header">
@@ -111,46 +118,93 @@ export default function AdminProducts() {
       </div>
 
       <div className="admin-toolbar">
-        <span className="badge badge-violet">{products.length} товаров</span>
         <button className="btn btn-primary" onClick={openCreate} id="create-product-btn">
           <HiOutlinePlus size={18} /> Добавить товар
         </button>
       </div>
 
-      <div className="table-container">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Название</th>
-              <th>Описание</th>
-              <th>Цена</th>
-              <th>Кол-во</th>
-              <th>Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map(p => (
-              <tr key={p.id} style={{ opacity: p.is_active === false ? 0.6 : 1 }}>
-                <td>
-                  <strong>{p.name}</strong>
-                  {p.is_active === false && <span className="badge badge-red" style={{ marginLeft: 8 }}>Удалён</span>}
-                </td>
-                <td style={{ color: 'var(--text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.description || '—'}</td>
-                <td><span className="gradient-text" style={{ fontWeight: 600 }}>₽{Number(p.price).toLocaleString('ru-RU')}</span></td>
-                <td><span className={p.now_amount > 0 ? '' : 'out-of-stock'}>{p.now_amount}</span></td>
-                <td>
-                  <div style={{ display: 'flex', gap: 4 }}>
-                    <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openEdit(p)}><HiOutlinePencil size={16} /></button>
-                    <button className="btn btn-danger btn-icon btn-sm" onClick={() => handleDelete(p.id)}><HiOutlineTrash size={16} /></button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="admin-filters-row">
+        <input
+          type="text"
+          className="input admin-search-input"
+          placeholder="Поиск товаров..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+        />
+        <select 
+          className="input admin-sort-select"
+          value={selectedCategory}
+          onChange={(e) => { setSelectedCategory(e.target.value); setPage(1); }}
+        >
+          <option value="">Все категории</option>
+          {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        <select 
+          className="input admin-sort-select"
+          value={activeFilter}
+          onChange={(e) => { setActiveFilter(e.target.value); setPage(1); }}
+        >
+          <option value="all">Все статусы</option>
+          <option value="active">Только активные</option>
+          <option value="inactive">Только удаленные</option>
+        </select>
+        <select 
+          className="input admin-sort-select"
+          value={priceFilter}
+          onChange={(e) => { setPriceFilter(e.target.value); setPage(1); }}
+        >
+          <option value="">По умолчанию</option>
+          <option value="cheaper">Сначала дешевые</option>
+          <option value="more_expensive">Сначала дорогие</option>
+        </select>
       </div>
 
-      <Pagination page={page} onPageChange={setPage} hasMore={products.length === 30} />
+      {loading ? (
+        <Loader size="lg" text="Загрузка товаров..." />
+      ) : products.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">🛍️</div>
+          <h3>Товары не найдены</h3>
+          <p>Попробуйте изменить фильтры или поисковый запрос</p>
+        </div>
+      ) : (
+        <>
+          <div className="table-container">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Описание</th>
+                  <th>Цена</th>
+                  <th>Кол-во</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map(p => (
+                  <tr key={p.id} style={{ opacity: p.is_active === false ? 0.6 : 1 }}>
+                    <td>
+                      <strong>{p.name}</strong>
+                      {p.is_active === false && <span className="badge badge-red" style={{ marginLeft: 8 }}>Удалён</span>}
+                    </td>
+                    <td style={{ color: 'var(--text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.description || '—'}</td>
+                    <td><span className="gradient-text" style={{ fontWeight: 600 }}>₽{Number(p.price).toLocaleString('ru-RU')}</span></td>
+                    <td><span className={p.now_amount > 0 ? '' : 'out-of-stock'}>{p.now_amount}</span></td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openEdit(p)}><HiOutlinePencil size={16} /></button>
+                        <button className="btn btn-danger btn-icon btn-sm" onClick={() => handleDelete(p.id)}><HiOutlineTrash size={16} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <Pagination page={page} onPageChange={setPage} hasMore={products.length === 30} />
+        </>
+      )}
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingProduct ? 'Редактировать товар' : 'Новый товар'}>
         <div className="admin-form">

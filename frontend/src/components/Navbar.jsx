@@ -1,10 +1,21 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { HiOutlineShoppingBag } from 'react-icons/hi';
+import { HiOutlineShoppingBag, HiOutlineSun, HiOutlineMoon } from 'react-icons/hi';
+import { useState, useEffect } from 'react';
 import './Navbar.css';
 
 export default function Navbar({ onToggleSidebar, cartCount = 0 }) {
   const { user, isAuthenticated } = useAuth();
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(t => t === 'dark' ? 'light' : 'dark');
+  };
 
   return (
     <nav className="navbar glass-strong">
@@ -21,6 +32,9 @@ export default function Navbar({ onToggleSidebar, cartCount = 0 }) {
       </div>
 
       <div className="navbar-right">
+        <button className="navbar-theme-btn btn-ghost btn-icon" onClick={toggleTheme} title="Toggle theme">
+          {theme === 'dark' ? <HiOutlineSun size={22} /> : <HiOutlineMoon size={22} />}
+        </button>
         {isAuthenticated ? (
           <>
             <Link to="/cart" className="navbar-cart-btn btn-ghost btn-icon" id="cart-nav-btn">

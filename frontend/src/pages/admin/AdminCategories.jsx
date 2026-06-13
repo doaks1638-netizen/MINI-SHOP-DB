@@ -11,6 +11,7 @@ export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [activeFilter, setActiveFilter] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCat, setEditingCat] = useState(null);
   const [name, setName] = useState('');
@@ -19,14 +20,16 @@ export default function AdminCategories() {
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get(`/categories?page=${page}`);
+      const query = { page };
+      if (activeFilter) query.active_filter = activeFilter;
+      const data = await api.get('/admin/categories/', query);
       setCategories(data);
     } catch {
       toast.error('Ошибка загрузки категорий');
     } finally {
       setLoading(false);
     }
-  }, [page, toast]);
+  }, [page, activeFilter, toast]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -75,7 +78,18 @@ export default function AdminCategories() {
 
       <div className="admin-toolbar">
         <span className="badge badge-cyan">{categories.length} категорий</span>
-        <button className="btn btn-primary" onClick={openCreate} id="create-category-btn">
+        
+        <select 
+          className="input home-sort"
+          value={activeFilter}
+          onChange={(e) => { setActiveFilter(e.target.value); setPage(1); }}
+        >
+          <option value="all">Все статусы</option>
+          <option value="active">Только активные</option>
+          <option value="inactive">Только удаленные</option>
+        </select>
+        
+        <button className="btn btn-primary" onClick={openCreate} id="create-category-btn" style={{ marginLeft: 'auto' }}>
           <HiOutlinePlus size={18} /> Добавить категорию
         </button>
       </div>
@@ -91,9 +105,12 @@ export default function AdminCategories() {
           </thead>
           <tbody>
             {categories.map(c => (
-              <tr key={c.id}>
+              <tr key={c.id} style={{ opacity: c.is_active === false ? 0.6 : 1 }}>
                 <td><code style={{ color: 'var(--text-muted)', fontSize: 'var(--font-xs)' }}>{c.id.slice(0, 8)}</code></td>
-                <td><strong>{c.name}</strong></td>
+                <td>
+                  <strong>{c.name}</strong>
+                  {c.is_active === false && <span className="badge badge-red" style={{ marginLeft: 8 }}>Удалена</span>}
+                </td>
                 <td>
                   <div style={{ display: 'flex', gap: 4 }}>
                     <button className="btn btn-ghost btn-icon btn-sm" onClick={() => openEdit(c)}><HiOutlinePencil size={16} /></button>
