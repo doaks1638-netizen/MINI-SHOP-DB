@@ -1,5 +1,5 @@
 from sqlalchemy import select, func
-from app.models.session import UserSession
+from app.models import UserSession
 from app.settings import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 

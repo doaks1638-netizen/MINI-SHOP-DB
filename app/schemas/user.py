@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
-from app.models import UserRole, CreatorUserRole
+from app.models.enums import UserRole, CreatorUserRole
 
 
 class UserCreate(BaseModel):

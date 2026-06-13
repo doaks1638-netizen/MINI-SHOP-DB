@@ -5,3 +5,4 @@ test.md
 .vscode/*
 .ruff_cache/
 .stfolder
+.ruff_errors.txt

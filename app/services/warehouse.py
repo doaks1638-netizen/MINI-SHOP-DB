@@ -1,8 +1,7 @@
+from app.models import Category, Product
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.models.product import Product
-from app.models.categories import Category
 
 
 async def update_amount(db: AsyncSession, product_id, diff):

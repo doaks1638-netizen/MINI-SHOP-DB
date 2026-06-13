@@ -1,17 +1,17 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
+from app.models import CartItem, Order, Product, User
 from app.database import DBsession
 from sqlalchemy import select, delete
 from sqlalchemy.orm import selectinload
-from app.models.order import Order
-from app.models.product import Product
-from app.models.order_status_enum import OrderStatus
+from app.models.enums import OrderStatus
 from app.services import debit_funds, update_amount
 from app.schemas import OrderCreate, OrderDTO, OrderRelDTO
-from app.models.user import User
-from app.models.cart_item import CartItem
 from uuid import UUID
 from typing import Annotated
+from app.routes import page_number
+from sqlalchemy import desc
 from app.routes import get_current_user
+from app.filters import DateFilter
 
 order_router = APIRouter(prefix="/orders", tags=["ORDERS"])
 
@@ -111,3 +111,39 @@ async def create_order_from_cart(
 
     # This is how deletion was intended;
     # the server simply has no reason to store past items in the user's shopping cart.
+
+
+@order_router.get("/", response_model=list[OrderDTO])
+async def get_all_orders(
+    db: DBsession,
+    page: page_number,
+    user: Annotated[User, Depends(get_current_user)],
+    date_filter: Annotated[DateFilter, Query()] = DateFilter.new,
+    status_filter: Annotated[list[OrderStatus] | None, Query()] = None,
+):
+    stmt = (
+        select(
+            Order.product_id,
+            Order.amount,
+            Order.id,
+            Order.status,
+            Order.created_at,
+        )
+        .join(User, User.id == Order.user_id)
+        .join(Product, Product.id == Order.product_id)
+        .where(User.id == user.id)
+    )
+
+    if status_filter:
+        stmt = stmt.where(Order.status.in_(status_filter))
+
+    match date_filter:
+        case DateFilter.new:
+            stmt = stmt.order_by(desc(Order.created_at))
+        case DateFilter.old:
+            stmt = stmt.order_by(Order.created_at)
+
+    stmt = stmt.limit(30).offset(30 * (page - 1))
+
+    rez = await db.execute(stmt)
+    return rez.mappings().all()

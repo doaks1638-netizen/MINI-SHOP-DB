@@ -1,15 +1,59 @@
 from fastapi import APIRouter, HTTPException, Depends
+from app.models import Category, Product
 from app.database import DBsession
-from app.models.product import Product
-from app.models.categories import Category
 from app.schemas import ProductCreate, ProductPatch
-from sqlalchemy import select, and_, insert, update
+from sqlalchemy import select, and_, insert, update, or_, desc
 from uuid import UUID
 from app.routes import get_current_admin
+from fastapi import Query
+from app.routes import page_number
+from app.schemas import ProductDTO
+from app.filters import PriceFilter, ActiveFilter
+from typing import Annotated
+
 
 admin_product_router = APIRouter(
     prefix="/admin/products", tags=["ADMIN"], dependencies=[Depends(get_current_admin)]
 )
+
+
+@admin_product_router.get("/", response_model=list[ProductDTO])
+async def get_all_products(
+    db: DBsession,
+    page: page_number,
+    category_id: Annotated[UUID, Query()] = None,
+    search: Annotated[str | None, Query()] = None,
+    active_filter: Annotated[ActiveFilter, Query()] = ActiveFilter.all,
+    price_filter: Annotated[PriceFilter | None, Query()] = None,
+):
+    stmt = select(Product).join(Category)
+
+    if active_filter != ActiveFilter.all:
+        match active_filter:
+            case ActiveFilter.active:
+                stmt = stmt.where(Product.is_active == True, Category.is_active == True)
+            case ActiveFilter.inactive:
+                stmt = stmt.where(
+                    or_(Product.is_active == False, Category.is_active == False)
+                )
+
+    if category_id is not None:
+        stmt = stmt.where(Category.id == category_id)
+
+    if search is not None:
+        stmt = stmt.where(Product.name.ilike(f"%{search}%"))
+
+    if price_filter is not None:
+        match price_filter:
+            case PriceFilter.more_expensive:
+                stmt = stmt.order_by(desc(Product.price))
+            case PriceFilter.cheaper:
+                stmt = stmt.order_by(Product.price)
+
+    stmt = stmt.limit(30).offset(30 * (page - 1))
+
+    rez = await db.scalars(stmt)
+    return rez.all()
 
 
 @admin_product_router.post("/")

@@ -1,8 +1,7 @@
 from fastapi import HTTPException
+from app.models import Order, Product
 from app.database import DBsession
 from sqlalchemy import select
-from app.models.order import Order
-from app.models.product import Product
 from app.services import debit_funds, update_amount
 from app.schemas import OrderCreate
 from uuid import UUID

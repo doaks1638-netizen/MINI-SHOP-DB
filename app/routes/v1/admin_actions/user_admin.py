@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+from app.models import Order, User
 from app.database import DBsession
 from app.schemas import UserPatch, AdminUserDTO, AdminUserDTOCount, AdminOrderDTO
-from app.models.order import Order
-from app.models.user import User
 from sqlalchemy import select, func
 from app.routes import get_current_admin, page_number
 from app.services import user_depends
+from app.models.enums import UserRole
+from typing import Annotated
 
 admin_user_router = APIRouter(
     prefix="/admin/users", dependencies=[Depends(get_current_admin)], tags=["ADMIN"]
@@ -13,7 +14,11 @@ admin_user_router = APIRouter(
 
 
 @admin_user_router.get("/", response_model=list[AdminUserDTOCount])
-async def get_users(db: DBsession, page: page_number):
+async def get_users(
+    db: DBsession,
+    page: page_number,
+    roles: Annotated[list[UserRole] | None, Query()] = None,
+):
     stmt = (
         select(
             User.id,
@@ -23,9 +28,13 @@ async def get_users(db: DBsession, page: page_number):
         )
         .outerjoin(Order)
         .group_by(User.id, User.name, User.is_active)
-        .limit(30)
-        .offset(30 * (page - 1))
     )
+
+    if roles:
+        stmt = stmt.where(User.role.in_(roles))
+
+    stmt = stmt.limit(30).offset(30 * (page - 1))
+
     users = (await db.execute(stmt)).mappings().all()
     return users
 

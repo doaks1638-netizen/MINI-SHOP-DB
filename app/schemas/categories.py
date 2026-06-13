@@ -13,5 +13,9 @@ class CategoryDTO(CategoryCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
+class AdminCategoryDTO(CategoryDTO):
+    is_active: bool
+
+
 class CategoryRelDTO(CategoryDTO):
     products: list[ProductShare] = []

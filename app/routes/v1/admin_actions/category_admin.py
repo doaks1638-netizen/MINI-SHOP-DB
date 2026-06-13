@@ -1,17 +1,41 @@
-from fastapi import APIRouter, HTTPException, Body, Depends
+from fastapi import APIRouter, HTTPException, Body, Depends, Query
 from sqlalchemy import select, insert
+from app.models import Category
 from app.database import DBsession
 from app.schemas import CategoryDTO, CategoryCreate
-from app.models.categories import Category
 from typing import Annotated
 from uuid import UUID
 from app.routes import get_current_admin
+from app.schemas import AdminCategoryDTO
+from app.routes import page_number
+from app.filters import ActiveFilter
 
 admin_category_router = APIRouter(
     prefix="/admin/categories",
     tags=["ADMIN"],
     dependencies=[Depends(get_current_admin)],
 )
+
+
+@admin_category_router.get("/", response_model=list[AdminCategoryDTO])
+async def get_categories(
+    db: DBsession,
+    page: page_number,
+    active_filter: Annotated[ActiveFilter, Query()] = ActiveFilter.all,
+):
+    stmt = select(Category)
+
+    if active_filter != ActiveFilter.all:
+        match active_filter:
+            case ActiveFilter.active:
+                stmt = stmt.where(Category.is_active == True)
+            case ActiveFilter.inactive:
+                stmt = stmt.where(Category.is_active == False)
+
+    stmt = stmt.limit(30).offset(30 * (page - 1))
+
+    rez = await db.scalars(stmt)
+    return rez.all()
 
 
 @admin_category_router.post(

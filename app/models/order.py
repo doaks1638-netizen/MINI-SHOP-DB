@@ -1,4 +1,5 @@
-from app.models import Base, idpk, OrderStatus
+from app.models.base import Base, idpk
+from app.models.enums import OrderStatus
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey, text
 from sqlalchemy.types import Enum, Numeric, DateTime
@@ -29,4 +30,4 @@ class Order(Base):
     )
     product_id: Mapped[UUID] = mapped_column(ForeignKey("products.id"))
     amount: Mapped[int]
-    product: Mapped['Product'] = relationship()
+    product: Mapped["Product"] = relationship()

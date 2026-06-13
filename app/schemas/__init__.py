@@ -6,7 +6,7 @@ from .cart_item import (
     AdminCart,
     AdminCartItemDTO,
 )
-from .categories import CategoryCreate, CategoryDTO, CategoryRelDTO
+from .categories import CategoryCreate, CategoryDTO, CategoryRelDTO, AdminCategoryDTO
 from .order import (
     OrderCreate,
     OrderDTO,
@@ -62,4 +62,5 @@ __all__ = [
     "AdminOrderDTO",
     "AdminCart",
     "AdminCartItemDTO",
+    "AdminCategoryDTO",
 ]

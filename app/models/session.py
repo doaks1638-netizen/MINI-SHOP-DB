@@ -1,4 +1,4 @@
-from app.models import Base, idpk, active
+from app.models.base import Base, idpk, active
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import DateTime
 from uuid import UUID

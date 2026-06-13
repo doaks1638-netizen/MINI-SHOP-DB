@@ -1,15 +1,13 @@
 from fastapi import APIRouter, Body, Depends, Query
 from sqlalchemy import select, case
 from sqlalchemy.dialects.postgresql import insert
-from app.models.cart_item import CartItem
+from app.models import CartItem, Product, User
 from app.schemas import CartItemDTO, CartItemWithStatus, CartItemStatus
 from app.database import DBsession
 from app.services import check_user_product_exists
 from typing import Annotated
 from uuid import UUID
 from app.routes import page_number
-from app.models.user import User
-from app.models.product import Product
 from app.routes import get_current_user
 
 cart_router = APIRouter(tags=["CART"], prefix="/cart")

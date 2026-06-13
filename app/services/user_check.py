@@ -1,6 +1,6 @@
+from app.models import User
 from app.database import DBsession
 from uuid import UUID
-from app.models.user import User
 from fastapi import HTTPException, Depends
 from typing import Annotated
 from sqlalchemy import select

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
+from app.models import User, UserSession
 from app.database import DBsession
 from app.routes import (
     exc,
@@ -7,8 +8,6 @@ from app.schemas import (
     TokenResponse,
     RefreshToken,
 )
-from app.models.user import User
-from app.models.session import UserSession
 from app.services import (
     create_tokens,
     decode_refresh_token,
@@ -42,10 +41,12 @@ async def google_login(sso: Annotated[GoogleSSO, Depends(get_google_sso)]):
 async def google_callback(
     sso: Annotated[GoogleSSO, Depends(get_google_sso)], request: Request, db: DBsession
 ):
+    from fastapi.responses import RedirectResponse
+
     try:
         google_user = await sso.verify_and_process(request)
     except Exception:
-        raise HTTPException(403, detail="Failed to verify user")
+        return RedirectResponse("/login?error=auth_failed")
 
     same_user_stmt = select(User).where(User.email == google_user.email)
     same_user = await db.scalar(same_user_stmt)
@@ -55,6 +56,9 @@ async def google_callback(
 
         same_user.picture = google_user.picture
         same_user.name = google_user.display_name
+
+        if not same_user.is_active:
+            same_user.is_active = True
 
         current_user = same_user
 
@@ -91,7 +95,9 @@ async def google_callback(
 
     await db.commit()
 
-    return tokens
+    return RedirectResponse(
+        f"/callback?access_token={tokens['access_token']}&refresh_token={tokens['refresh_token']}"
+    )
 
 
 auth_router.include_router(google_router)

@@ -1,9 +1,9 @@
-from app.models import Base, idpk, active
+from app.models.base import Base, idpk, active
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import String, Numeric, Enum
 from sqlalchemy import text, CheckConstraint, UniqueConstraint
 from decimal import Decimal
-from app.models import UserRole
+from app.models.enums import UserRole
 
 
 class User(Base):

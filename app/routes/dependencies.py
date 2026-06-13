@@ -3,9 +3,9 @@ from fastapi import Depends, Query, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from typing import Annotated
+from app.models import User
 from app.database import DBsession
-from app.models.user import User
-from app.models import UserRole
+from app.models.enums import UserRole
 from app.settings import settings
 import jwt
 

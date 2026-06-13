@@ -1,4 +1,4 @@
-from app.models import Base, idpk, active
+from app.models.base import Base, idpk, active
 from sqlalchemy.types import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import TYPE_CHECKING

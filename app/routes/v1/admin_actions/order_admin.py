@@ -1,15 +1,16 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
+from app.models import Order, User
 from app.database import DBsession
-from sqlalchemy import select, update
+from sqlalchemy import select, update, desc
 from sqlalchemy.orm import selectinload
-from app.models.order import Order
-from app.models.user import User
-from app.models.order_status_enum import OrderStatus
+from app.models.enums import OrderStatus
 from app.services import update_amount, debit_funds
+from app.filters import DateFilter
 from app.schemas import OrderStatusEdit, OrderRelDTO, AdminOrderDTO
 from uuid import UUID
 from app.routes import page_number
 from app.routes import get_current_admin
+from typing import Annotated
 
 admin_order_router = APIRouter(
     prefix="/admin/orders", tags=["ADMIN"], dependencies=[Depends(get_current_admin)]
@@ -17,22 +18,32 @@ admin_order_router = APIRouter(
 
 
 @admin_order_router.get("/", response_model=list[AdminOrderDTO])
-async def get_all_orders(db: DBsession, page: page_number):
-    stmt = (
-        select(
-            Order.product_id,
-            Order.amount,
-            Order.id,
-            Order.status,
-            Order.created_at,
-            Order.created_at,
-            User.is_active.label("is_user_active"),
-        )
-        .join(User, User.id == Order.user_id)
-        .where(Order.status != OrderStatus.cancelled)
-        .limit(30)
-        .offset(30 * (page - 1))
-    )
+async def get_all_orders(
+    db: DBsession,
+    page: page_number,
+    date_filter: Annotated[DateFilter, Query()] = DateFilter.new,
+    status_filter: Annotated[list[OrderStatus] | None, Query()] = None,
+):
+    stmt = select(
+        Order.product_id,
+        Order.amount,
+        Order.id,
+        Order.status,
+        Order.created_at,
+        User.is_active.label("is_user_active"),
+    ).join(User, User.id == Order.user_id)
+
+    if status_filter:
+        stmt = stmt.where(Order.status.in_(status_filter))
+
+    match date_filter:
+        case DateFilter.new:
+            stmt = stmt.order_by(desc(Order.created_at))
+        case DateFilter.old:
+            stmt = stmt.order_by(Order.created_at)
+
+    stmt = stmt.limit(30).offset(30 * (page - 1))
+
     rez = await db.execute(stmt)
     return rez.mappings().all()
 
