@@ -3,9 +3,8 @@ from app.database import DBsession
 from sqlalchemy import select, delete
 from sqlalchemy.orm import selectinload
 from app.models.order import Order
-from app.models.product import Product
 from app.models.order_status_enum import OrderStatus
-from app.services import debit_funds, update_amount
+from app.services import debit_funds, update_amount, create_order
 from app.schemas import OrderCreate, OrderDTO, OrderRelDTO
 from app.models.user import User
 from app.models.cart_item import CartItem
@@ -17,33 +16,15 @@ order_router = APIRouter(prefix="/orders", tags=["ORDERS"])
 
 
 @order_router.post("/", status_code=201, response_model=OrderDTO)
-async def create_order(
+async def create_one_order(
     db: DBsession,
     order: OrderCreate,
     user: Annotated[User, Depends(get_current_user)],
 ):
-
-    product = await db.scalar(
-        select(Product).where(Product.id == order.product_id, Product.is_active == True)
-    )
-
-    if not product:
-        raise HTTPException(404, detail="Product not found")
-
-    actual_price = product.price
-
-    new_order = Order(user_id=user.id, price_for_one=actual_price, **order.model_dump())
-    db.add(new_order)
-
-    await update_amount(db, order.product_id, -order.amount)
-
-    await debit_funds(db, user.id, -(actual_price * order.amount))
+    rez = await create_order(db, order, user.id)
 
     await db.commit()
-
-    await db.refresh(new_order)
-
-    return new_order
+    return rez
 
 
 @order_router.get("/me/{order_id}", response_model=OrderRelDTO)
@@ -90,13 +71,13 @@ async def create_order_from_cart(
         raise HTTPException(404, detail="The cart is empty")
 
     orders_to_create = [
-        OrderCreate(product_id=item.product_id, amount=item.amount) 
+        OrderCreate(product_id=item.product_id, amount=item.amount)
         for item in cart_items
     ]
 
     for order_create in orders_to_create:
-        await create_order(db, order_create, user=user)
-        
+        await create_order(db, order_create, user_id=user.id, skip_if_not_in_stock=True)
+
     await db.execute(delete(CartItem).where(CartItem.user_id == user.id))
     await db.commit()
 
