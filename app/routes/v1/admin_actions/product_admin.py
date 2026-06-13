@@ -40,15 +40,13 @@ async def change_product_info(db: DBsession, new_info: ProductPatch, product_id:
         )
     if new_info.get("category_id"):
         new_info_category = select(Category).where(
-            Category.id == new_info["category_id"], Category.is_active == True
+            Category.id == new_info["category_id"]
         )
         if not await db.scalar(new_info_category):
             raise HTTPException(status_code=404, detail="Active category not found")
     stmt = (
         update(Product)
-        .where(Product.category_id == Category.id)
         .where(Product.id == product_id)
-        .where(Product.is_active == True, Category.is_active == True)
         .values(**new_info)
         .returning(Product.id)
     )
@@ -60,9 +58,7 @@ async def change_product_info(db: DBsession, new_info: ProductPatch, product_id:
 
 @admin_product_router.delete("/{product_id}", status_code=204)
 async def delete_product(db: DBsession, product_id: UUID):
-    product = await db.scalar(
-        select(Product).where(Product.id == product_id, Product.is_active == True)
-    )
+    product = await db.scalar(select(Product).where(Product.id == product_id))
     if not product:
         raise HTTPException(404, detail="Product not found")
     product.is_active = False

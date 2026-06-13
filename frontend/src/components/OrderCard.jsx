@@ -38,6 +38,11 @@ export default function OrderCard({ order, onCancel, onStatusChange, showActions
       </div>
 
       <div className="order-card-body">
+        {order.is_user_active === false && (
+          <div className="order-detail" style={{ marginBottom: '8px' }}>
+            <span className="badge badge-red">Пользователь удалён</span>
+          </div>
+        )}
         <div className="order-detail">
           <span className="order-detail-label">Количество</span>
           <span className="order-detail-value">{order.amount} шт.</span>

@@ -53,8 +53,11 @@ export default function AdminUsers() {
           </thead>
           <tbody>
             {users.map((u, i) => (
-              <tr key={i}>
-                <td><strong>{u.name}</strong></td>
+              <tr key={i} style={{ opacity: u.is_user_active === false ? 0.6 : 1 }}>
+                <td>
+                  <strong>{u.name}</strong>
+                  {u.is_user_active === false && <span className="badge badge-red" style={{ marginLeft: 8 }}>Удалён</span>}
+                </td>
                 <td><span className="badge badge-violet">{u.orders_count}</span></td>
               </tr>
             ))}

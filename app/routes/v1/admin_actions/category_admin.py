@@ -41,11 +41,7 @@ async def change_category_name(
     category_id: UUID,
     name: Annotated[str, Body(embed=True, max_length=50)],
 ):
-    check = (
-        select(Category)
-        .where(Category.id == category_id)
-        .where(Category.is_active == True)
-    )
+    check = select(Category).where(Category.id == category_id)
     category = await db.scalar(check)
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
@@ -60,7 +56,7 @@ async def change_category_name(
 )
 async def delete_category(db: DBsession, category_id: UUID):
     category: Category = await db.scalar(
-        select(Category).where(Category.id == category_id, Category.is_active == True)
+        select(Category).where(Category.id == category_id)
     )
     if not category:
         raise HTTPException(404, detail="Category not found")

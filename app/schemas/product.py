@@ -11,6 +11,7 @@ class ProductCreate(BaseModel):
     description: Annotated[str | None, Field(max_length=200)] = None
     price: Annotated[Decimal, Field(ge=0)]
     now_amount: Annotated[int, Field(ge=0)]
+    is_active: bool
 
 
 class ProductDTO(ProductCreate):
@@ -28,3 +29,4 @@ class ProductPatch(BaseModel):
     description: Annotated[str | None, Field(max_length=200)] = None
     price: Annotated[Decimal | None, Field(ge=0)] = None
     now_amount: Annotated[int | None, Field(ge=0)] = None
+    is_active: bool = True

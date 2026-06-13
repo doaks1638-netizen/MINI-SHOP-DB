@@ -59,8 +59,11 @@ export default function AdminCarts() {
             </thead>
             <tbody>
               {carts.map((c, i) => (
-                <tr key={i}>
-                  <td><code style={{ color: 'var(--text-muted)', fontSize: 'var(--font-xs)' }}>{c.user_id?.slice(0, 12)}...</code></td>
+                <tr key={i} style={{ opacity: c.is_user_active === false ? 0.6 : 1 }}>
+                  <td>
+                    <code style={{ color: 'var(--text-muted)', fontSize: 'var(--font-xs)' }}>{c.user_id?.slice(0, 12)}...</code>
+                    {c.is_user_active === false && <span className="badge badge-red" style={{ marginLeft: 8 }}>Пользователь удалён</span>}
+                  </td>
                   <td><span className="badge badge-violet">{c.total_products}</span></td>
                   <td><span className="badge badge-cyan">{c.total_items}</span></td>
                 </tr>

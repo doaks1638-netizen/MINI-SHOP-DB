@@ -3,3 +3,5 @@ test.md
 *__pycache__
 .venv/
 .vscode/*
+.ruff_cache/
+.stfolder

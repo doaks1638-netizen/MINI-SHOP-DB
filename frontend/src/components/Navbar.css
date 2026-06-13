@@ -58,6 +58,9 @@
   position: relative;
   color: var(--text-secondary);
   transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .navbar-cart-btn:hover {

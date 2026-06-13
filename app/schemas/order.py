@@ -17,6 +17,10 @@ class OrderDTO(OrderCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
+class AdminOrderDTO(OrderDTO):
+    is_user_active: bool
+
+
 class OrderStatusEdit(BaseModel):
     status: OrderStatus
 

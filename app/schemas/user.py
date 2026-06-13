@@ -22,9 +22,17 @@ class UserDTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class AdminUserDTO(UserDTO):
+    is_active: bool
+
+
 class UserDTOCount(BaseModel):
     name: Annotated[str, Field(max_length=100)]
     orders_count: Annotated[int, Field(ge=0)]
+
+
+class AdminUserDTOCount(UserDTOCount):
+    is_user_active: bool
 
 
 class UserPatch(BaseModel):

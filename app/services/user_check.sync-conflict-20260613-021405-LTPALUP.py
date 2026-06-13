@@ -7,7 +7,9 @@ from sqlalchemy import select
 
 
 async def check_user_exist(db: DBsession, user_id: UUID):
-    user = await db.scalar(select(User).where(User.id == user_id))
+    user = await db.scalar(
+        select(User).where(User.id == user_id).where(User.is_active == True)
+    )
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user

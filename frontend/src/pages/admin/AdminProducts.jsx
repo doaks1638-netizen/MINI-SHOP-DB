@@ -14,7 +14,7 @@ export default function AdminProducts() {
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [form, setForm] = useState({ category_id: '', name: '', description: '', price: '', now_amount: '' });
+  const [form, setForm] = useState({ category_id: '', name: '', description: '', price: '', now_amount: '', is_active: true });
   const toast = useToast();
 
   const fetchProducts = useCallback(async () => {
@@ -51,7 +51,7 @@ export default function AdminProducts() {
 
   const openCreate = () => {
     setEditingProduct(null);
-    setForm({ category_id: categories[0]?.id || '', name: '', description: '', price: '', now_amount: '' });
+    setForm({ category_id: categories[0]?.id || '', name: '', description: '', price: '', now_amount: '', is_active: true });
     setModalOpen(true);
   };
 
@@ -63,6 +63,7 @@ export default function AdminProducts() {
       description: product.description || '',
       price: product.price,
       now_amount: product.now_amount,
+      is_active: product.is_active ?? true,
     });
     setModalOpen(true);
   };
@@ -129,8 +130,11 @@ export default function AdminProducts() {
           </thead>
           <tbody>
             {products.map(p => (
-              <tr key={p.id}>
-                <td><strong>{p.name}</strong></td>
+              <tr key={p.id} style={{ opacity: p.is_active === false ? 0.6 : 1 }}>
+                <td>
+                  <strong>{p.name}</strong>
+                  {p.is_active === false && <span className="badge badge-red" style={{ marginLeft: 8 }}>Удалён</span>}
+                </td>
                 <td style={{ color: 'var(--text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.description || '—'}</td>
                 <td><span className="gradient-text" style={{ fontWeight: 600 }}>₽{Number(p.price).toLocaleString('ru-RU')}</span></td>
                 <td><span className={p.now_amount > 0 ? '' : 'out-of-stock'}>{p.now_amount}</span></td>
@@ -174,6 +178,10 @@ export default function AdminProducts() {
               <label className="input-label">Количество</label>
               <input className="input" type="number" value={form.now_amount} onChange={e => setForm({ ...form, now_amount: e.target.value })} placeholder="0" min="0" />
             </div>
+          </div>
+          <div className="input-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '1rem' }}>
+            <input type="checkbox" id="is_active_checkbox" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} />
+            <label htmlFor="is_active_checkbox" className="input-label" style={{ marginBottom: 0, cursor: 'pointer' }}>Товар активен (виден покупателям)</label>
           </div>
           <div className="modal-actions">
             <button className="btn btn-ghost" onClick={() => setModalOpen(false)}>Отмена</button>

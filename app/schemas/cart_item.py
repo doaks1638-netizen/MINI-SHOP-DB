@@ -17,10 +17,18 @@ class Cart(
     total_items: int
 
 
+class AdminCart(Cart):
+    is_user_active: bool
+
+
 class CartItemDTO(BaseModel):
     product_id: UUID
     amount: Annotated[int, Field(gt=0)]
     model_config = ConfigDict(from_attributes=True)
+
+
+class AdminCartItemDTO(CartItemDTO):
+    is_user_active: bool
 
 
 class CartItemWithStatus(CartItemDTO):
