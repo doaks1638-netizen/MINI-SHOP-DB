@@ -1,7 +1,8 @@
 from app.models.base import Base, idpk, active
 from sqlalchemy.types import String, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, CheckConstraint, UniqueConstraint
+from sqlalchemy import ForeignKey, CheckConstraint, UniqueConstraint, Computed, Index
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from uuid import UUID
 from decimal import Decimal
 from typing import TYPE_CHECKING
@@ -25,8 +26,25 @@ class Product(Base):
 
     category: Mapped["Category"] = relationship(back_populates="products")
 
+    tsv: Mapped[TSVECTOR] = mapped_column(
+        TSVECTOR,
+        Computed(
+            """
+        setweight(to_tsvector('english', coalesce(name, '')), 'A')
+        ||
+        setweight(to_tsvector('russian', coalesce(name, '')), 'A')
+        ||
+        setweight(to_tsvector('english', coalesce(description, '')), 'B')
+        ||
+        setweight(to_tsvector('russian', coalesce(description, '')), 'B')
+        """,
+            persisted=True,
+        ),
+    )
+
     __table_args__ = (
         CheckConstraint("now_amount >= 0", name="product_amount_positive"),
         CheckConstraint("price >= 0", name="product_price_positive"),
         UniqueConstraint("category_id", "name"),
+        Index("ix_products_tsv_gin", "tsv", postgresql_using="gin"),
     )
