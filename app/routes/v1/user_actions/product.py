@@ -3,7 +3,7 @@ from app.models import Category, Product
 from app.database import DBsession
 from app.routes import page_number
 from app.schemas import ProductDTO, ProductRelDTO
-from sqlalchemy import select, desc, func
+from sqlalchemy import select, func
 from sqlalchemy.orm import joinedload
 from uuid import UUID
 from typing import Annotated
@@ -22,6 +22,7 @@ async def get_all_products(
 ):
 
     filters = []
+    orders_filter = []
 
     if category_id is not None:
         filters.append(Category.id == category_id)
@@ -29,9 +30,9 @@ async def get_all_products(
     if price_filter is not None:
         match price_filter:
             case PriceFilter.more_expensive:
-                filters.append(desc(Product.price))
+                orders_filter.append(Product.price.desc())
             case PriceFilter.cheaper:
-                filters.append(Product.price)
+                orders_filter.append(Product.price)
 
     rank_col = None
     if search is not None:
@@ -55,7 +56,7 @@ async def get_all_products(
             .where(*filters)
             .limit(30)
             .offset(30 * (page - 1))
-            .order_by(desc(rank_col))
+            .order_by(rank_col.desc(), *orders_filter)
         )
     else:
         stmt = (
@@ -65,6 +66,7 @@ async def get_all_products(
             .where(*filters)
             .limit(30)
             .offset(30 * (page - 1))
+            .order_by(*orders_filter)
         )
 
     rez = await db.scalars(stmt)
