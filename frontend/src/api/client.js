@@ -123,11 +123,11 @@ export const api = {
   },
   post: (endpoint, body) => apiRequest(endpoint, {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: body instanceof FormData ? body : JSON.stringify(body),
   }),
   patch: (endpoint, body) => apiRequest(endpoint, {
     method: 'PATCH',
-    body: JSON.stringify(body),
+    body: body instanceof FormData ? body : JSON.stringify(body),
   }),
   delete: (endpoint) => apiRequest(endpoint, { method: 'DELETE' }),
 };

@@ -18,7 +18,7 @@ export default function AdminProducts() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [form, setForm] = useState({ category_id: '', name: '', description: '', price: '', now_amount: '', is_active: true });
+  const [form, setForm] = useState({ category_id: '', name: '', description: '', price: '', now_amount: '', is_active: true, picture_file: null });
   const toast = useToast();
 
   const fetchProducts = useCallback(async () => {
@@ -60,7 +60,7 @@ export default function AdminProducts() {
 
   const openCreate = () => {
     setEditingProduct(null);
-    setForm({ category_id: categories[0]?.id || '', name: '', description: '', price: '', now_amount: '', is_active: true });
+    setForm({ category_id: categories[0]?.id || '', name: '', description: '', price: '', now_amount: '', is_active: true, picture_file: null });
     setModalOpen(true);
   };
 
@@ -73,24 +73,29 @@ export default function AdminProducts() {
       price: product.price,
       now_amount: product.now_amount,
       is_active: product.is_active ?? true,
+      picture_file: null,
     });
     setModalOpen(true);
   };
 
   const handleSubmit = async () => {
     try {
-      const body = {
-        ...form,
-        price: parseFloat(form.price),
-        now_amount: parseInt(form.now_amount),
-        description: form.description || null,
-      };
+      const payload = new FormData();
+      if (form.category_id) payload.append('category_id', form.category_id);
+      payload.append('name', form.name);
+      if (form.description) payload.append('description', form.description);
+      if (form.price !== '') payload.append('price', form.price);
+      if (form.now_amount !== '') payload.append('now_amount', form.now_amount);
+      payload.append('is_active', form.is_active);
+      if (form.picture_file) {
+        payload.append('picture_file', form.picture_file);
+      }
 
       if (editingProduct) {
-        await api.patch(`/admin/products/${editingProduct.id}`, body);
+        await api.patch(`/admin/products/${editingProduct.id}`, payload);
         toast.success('Товар обновлён');
       } else {
-        await api.post('/admin/products/', body);
+        await api.post('/admin/products/', payload);
         toast.success('Товар создан');
       }
       setModalOpen(false);
@@ -174,6 +179,7 @@ export default function AdminProducts() {
               <thead>
                 <tr>
                   <th>Название</th>
+                  <th>Изображение</th>
                   <th>Описание</th>
                   <th>Цена</th>
                   <th>Кол-во</th>
@@ -186,6 +192,13 @@ export default function AdminProducts() {
                     <td>
                       <strong>{p.name}</strong>
                       {p.is_active === false && <span className="badge badge-red" style={{ marginLeft: 8 }}>Удалён</span>}
+                    </td>
+                    <td>
+                      {p.image_url ? (
+                        <img src={p.image_url} alt={p.name} style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }} />
+                      ) : (
+                        <div style={{ width: 40, height: 40, background: '#eee', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>-</div>
+                      )}
                     </td>
                     <td style={{ color: 'var(--text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.description || '—'}</td>
                     <td><span className="gradient-text" style={{ fontWeight: 600 }}>₽{Number(p.price).toLocaleString('ru-RU')}</span></td>
@@ -232,6 +245,21 @@ export default function AdminProducts() {
               <label className="input-label">Количество</label>
               <input className="input" type="number" value={form.now_amount} onChange={e => setForm({ ...form, now_amount: e.target.value })} placeholder="0" min="0" />
             </div>
+          </div>
+          <div className="input-group" style={{ marginTop: '1rem' }}>
+            <label className="input-label">Изображение товара</label>
+            <input 
+              type="file" 
+              className="input" 
+              accept="image/png, image/jpeg" 
+              onChange={e => setForm({ ...form, picture_file: e.target.files[0] })} 
+            />
+            {editingProduct?.image_url && !form.picture_file && (
+              <div style={{ marginTop: '8px' }}>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Текущее изображение:</p>
+                <img src={editingProduct.image_url} alt="Current" style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 8 }} />
+              </div>
+            )}
           </div>
           <div className="input-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '1rem' }}>
             <input type="checkbox" id="is_active_checkbox" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })} />

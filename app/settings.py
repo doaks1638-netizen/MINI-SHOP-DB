@@ -36,5 +36,7 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
+    BASE_DIR: Path = Path(__file__).parent.parent
+
 
 settings = Settings()  # make settings singleton

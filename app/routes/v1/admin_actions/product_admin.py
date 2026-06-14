@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from app.models import Category, Product
 from app.database import DBsession
 from app.schemas import ProductCreate, ProductPatch
@@ -10,7 +10,7 @@ from app.routes import page_number
 from app.schemas import ProductDTO
 from app.filters import PriceFilter, ActiveFilter
 from typing import Annotated
-
+from app.media import save_product_image, remove_product_image
 
 admin_product_router = APIRouter(
     prefix="/admin/products", tags=["ADMIN"], dependencies=[Depends(get_current_admin)]
@@ -90,7 +90,11 @@ async def get_all_products(
 
 
 @admin_product_router.post("/")
-async def create_new_product(db: DBsession, new_product: ProductCreate):
+async def create_new_product(
+    db: DBsession,
+    new_product: Annotated[ProductCreate, Depends(ProductCreate.as_form)],
+    picture_file: Annotated[UploadFile | None, File] = None,
+):
     stmt = select(Product).where(
         and_(
             Product.category_id == new_product.category_id,
@@ -103,39 +107,57 @@ async def create_new_product(db: DBsession, new_product: ProductCreate):
             status_code=409,
             detail="Product with same name and category already exists!",
         )
+    image_url = await save_product_image(picture_file) if picture_file else None
+
+    new_data = new_product.model_dump()
+    new_data["image_url"] = image_url
+
     stmt = insert(Product).values(**new_product.model_dump())
     await db.execute(stmt)
     await db.commit()
 
 
 @admin_product_router.patch("/{product_id}")
-async def change_product_info(db: DBsession, new_info: ProductPatch, product_id: UUID):
-    new_info = new_info.model_dump(exclude_unset=True)
-    if not new_info:
+async def change_product_info(
+    db: DBsession,
+    product_id: UUID,
+    new_info: Annotated[ProductPatch | None, Depends(ProductPatch.as_form)] = None,
+    picture_file: Annotated[UploadFile | None, File] = None,
+):
+    product = await db.get(Product, product_id)
+
+    if not product:
+        raise HTTPException(404, detail="Product not found")
+
+    new_info: dict = (
+        new_info.model_dump(exclude_unset=True) if new_info is not None else {}
+    )
+
+    if not new_info and picture_file is None:
         raise HTTPException(
             status_code=400, detail="At least one field must be provided for update"
         )
+
     if new_info.get("category_id"):
         new_info_category = select(Category).where(
             Category.id == new_info["category_id"]
         )
         if not await db.scalar(new_info_category):
             raise HTTPException(status_code=404, detail="Active category not found")
-    stmt = (
-        update(Product)
-        .where(Product.id == product_id)
-        .values(**new_info)
-        .returning(Product.id)
-    )
-    new_product = await db.scalar(stmt)
-    if not new_product:
-        raise HTTPException(status_code=404, detail="Product not found")
+
+    if picture_file is not None:
+        remove_product_image(product.image_url)
+        new_info["image_url"] = await save_product_image(picture_file)
+
+    for key, value in new_info.items():
+        setattr(product, key, value)
+
     await db.commit()
 
 
 @admin_product_router.delete("/{product_id}", status_code=204)
 async def delete_product(db: DBsession, product_id: UUID):
-    product = await db.scalar(select(Product).where(Product.id == product_id))
+    product = await db.get(Product, product_id)
     if not product:
         raise HTTPException(404, detail="Product not found")
     product.is_active = False

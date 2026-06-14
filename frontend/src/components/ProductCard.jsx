@@ -9,10 +9,14 @@ export default function ProductCard({ product, onAddToCart, onClick }) {
 
   return (
     <div className="product-card card card-interactive gradient-border" onClick={() => onClick?.(product)} id={`product-${product.id}`}>
-      <div className="product-card-visual" style={{ height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--gradient-surface)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0', margin: 'calc(-1 * var(--space-lg)) calc(-1 * var(--space-lg)) var(--space-md) calc(-1 * var(--space-lg))' }}>
-        <div className="product-card-icon" style={{ fontSize: '4rem', fontWeight: 'bold', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          <span>{product.name?.[0]?.toUpperCase() || '?'}</span>
-        </div>
+      <div className="product-card-visual" style={{ height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--gradient-surface)', borderRadius: 'var(--radius-md) var(--radius-md) 0 0', margin: 'calc(-1 * var(--space-lg)) calc(-1 * var(--space-lg)) var(--space-md) calc(-1 * var(--space-lg))', overflow: 'hidden' }}>
+        {product.image_url ? (
+          <img src={product.image_url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <div className="product-card-icon" style={{ fontSize: '4rem', fontWeight: 'bold', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <span>{product.name?.[0]?.toUpperCase() || '?'}</span>
+          </div>
+        )}
       </div>
       <div className="product-card-body">
         <h3 className="product-card-name" style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{product.name}</h3>

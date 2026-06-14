@@ -23,6 +23,7 @@ class Product(Base):
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     now_amount: Mapped[int]
     is_active: Mapped[active]
+    image_url: Mapped[str | None] = None
 
     category: Mapped["Category"] = relationship(back_populates="products")
 

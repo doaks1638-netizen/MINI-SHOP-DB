@@ -69,10 +69,14 @@ export default function ProductPage() {
       </button>
 
       <div className="product-detail-card glass-strong">
-        <div className="product-detail-visual">
-          <div className="product-detail-icon gradient-border">
-            <span className="gradient-text">{product.name?.[0]?.toUpperCase()}</span>
-          </div>
+        <div className="product-detail-visual" style={{ overflow: 'hidden' }}>
+          {product.image_url ? (
+            <img src={product.image_url} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <div className="product-detail-icon gradient-border">
+              <span className="gradient-text">{product.name?.[0]?.toUpperCase()}</span>
+            </div>
+          )}
         </div>
 
         <div className="product-detail-info">
