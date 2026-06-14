@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.models import Category, Product
 from app.database import DBsession
 from app.schemas import ProductCreate, ProductPatch
-from sqlalchemy import select, and_, insert, update, or_, desc
+from sqlalchemy import select, and_, insert, update, or_, desc, func
 from uuid import UUID
 from app.routes import get_current_admin
 from fastapi import Query
@@ -26,34 +26,67 @@ async def get_all_products(
     active_filter: Annotated[ActiveFilter, Query()] = ActiveFilter.all,
     price_filter: Annotated[PriceFilter | None, Query()] = None,
 ):
-    stmt = select(Product).join(Category)
+
+    filters = []
 
     if active_filter != ActiveFilter.all:
         match active_filter:
             case ActiveFilter.active:
-                stmt = stmt.where(Product.is_active == True, Category.is_active == True)
+                filters.extend([Product.is_active == True, Category.is_active == True])
             case ActiveFilter.inactive:
-                stmt = stmt.where(
+                filters.append(
                     or_(Product.is_active == False, Category.is_active == False)
                 )
 
     if category_id is not None:
-        stmt = stmt.where(Category.id == category_id)
+        filters.append(Category.id == category_id)
 
+    rank_col = None
     if search is not None:
-        stmt = stmt.where(Product.name.ilike(f"%{search}%"))
+        search = search.strip()
 
+        if search:
+            ts_query_ru = func.websearch_to_tsquery("russian", search)
+            ts_query_en = func.websearch_to_tsquery("english", search)
+
+            ts_query = ts_query_en.op("||")(ts_query_ru)
+
+            filters.append(Product.tsv.op("@@")(ts_query))
+
+            rank_col = func.ts_rank_cd(Product.tsv, ts_query).label("rank")
+
+    order_by_filters = []
     if price_filter is not None:
         match price_filter:
             case PriceFilter.more_expensive:
-                stmt = stmt.order_by(desc(Product.price))
+                order_by_filters.append(desc(Product.price))
             case PriceFilter.cheaper:
-                stmt = stmt.order_by(Product.price)
+                order_by_filters.append(Product.price)
 
-    stmt = stmt.limit(30).offset(30 * (page - 1))
+    if rank_col is not None:
+        stmt = (
+            select(Product, rank_col)
+            .join(Category)
+            .where(*filters)
+            .limit(30)
+            .offset(30 * (page - 1))
+            .order_by(desc(rank_col), *order_by_filters)
+        )
+    else:
+        stmt = (
+            select(Product)
+            .join(Category)
+            .where(*filters)
+            .limit(30)
+            .offset(30 * (page - 1))
+            .order_by(*order_by_filters)
+        )
 
-    rez = await db.scalars(stmt)
-    return rez.all()
+    rez = await db.execute(stmt)
+
+    if rank_col is not None:
+        return [x[0] for x in rez.all()]
+    return rez.scalars().all()
 
 
 @admin_product_router.post("/")
