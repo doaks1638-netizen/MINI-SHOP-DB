@@ -1,4 +1,12 @@
-from app.models import CartItem, Category, Order, Product, User, UserSession
+from app.models import (
+    CartItem,
+    Category,
+    Order,
+    Product,
+    User,
+    UserSession,
+    Payment,
+)
 import asyncio
 from logging.config import fileConfig
 

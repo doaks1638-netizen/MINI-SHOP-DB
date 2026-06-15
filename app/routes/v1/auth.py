@@ -21,6 +21,7 @@ from app.settings import settings
 from typing import Annotated
 from fastapi_sso import GoogleSSO
 from app.settings import settings
+from fastapi.responses import RedirectResponse
 
 auth_router = APIRouter(prefix="/auth", tags=["AUTHENTICATION"])
 google_router = APIRouter(prefix="/google", tags=["GOOGLE"])
@@ -41,7 +42,6 @@ async def google_login(sso: Annotated[GoogleSSO, Depends(get_google_sso)]):
 async def google_callback(
     sso: Annotated[GoogleSSO, Depends(get_google_sso)], request: Request, db: DBsession
 ):
-    from fastapi.responses import RedirectResponse
 
     try:
         google_user = await sso.verify_and_process(request)

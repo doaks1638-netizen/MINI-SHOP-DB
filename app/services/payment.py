@@ -1,9 +1,37 @@
-from app.models import User
+from yookassa import Configuration, Payment
+from decimal import Decimal
+from app.settings import settings
+from anyio import to_thread
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from uuid import UUID
-from decimal import Decimal
+from app.models import User
 from fastapi import HTTPException
+from uuid import UUID
+
+
+async def create_yookaassa_payment(db: AsyncSession, amount: Decimal, idempotency_key):
+
+    Configuration.account_id = settings.YOOKASSA_SHOP_ID
+    Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
+
+    payment = {
+        "amount": {"value": f"{amount:.2f}", "currency": "RUB"},
+        "confirmation": {
+            "type": "redirect",
+            "return_url": settings.YOOKASSA_RETURN_URL,
+        },
+        "capture": True,
+        "description": "Пополнение баланса пользователя",
+    }
+
+    def _request(payment: dict, idempotency_key: str) -> Payment:
+        return Payment.create(payment, str(idempotency_key))
+
+    payment: Payment = await to_thread.run_sync(_request, payment, idempotency_key)
+
+    confirmation_url = getattr(payment.confirmation, "confirmation_url", None)
+
+    return (payment.id, confirmation_url)
 
 
 async def debit_funds(db: AsyncSession, user_id: UUID, diff: Decimal):

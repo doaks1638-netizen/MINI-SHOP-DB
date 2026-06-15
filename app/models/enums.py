@@ -18,3 +18,9 @@ class UserRole(str, Enum):
 class CreatorUserRole(str, Enum):
     admin = "admin"
     user = "user"
+
+
+class PaymentStatus(str, Enum):
+    pending = "pending"
+    succeeded = "succeeded"
+    canceled = "canceled"

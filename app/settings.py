@@ -38,5 +38,9 @@ class Settings(BaseSettings):
 
     BASE_DIR: Path = Path(__file__).parent.parent
 
+    YOOKASSA_SHOP_ID: int
+    YOOKASSA_SECRET_KEY: str
+    YOOKASSA_RETURN_URL: str = "http://localhost:8000/"
+
 
 settings = Settings()  # make settings singleton

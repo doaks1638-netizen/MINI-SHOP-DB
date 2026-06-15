@@ -1,14 +1,16 @@
-from fastapi import APIRouter, Depends
-from app.models import User
+from fastapi import APIRouter, Depends, HTTPException
+from app.models import User, Payment
+from app.models.enums import PaymentStatus
 from app.database import DBsession
 from app.schemas import (
     UserPatch,
     UserDTO,
     BalanceUpdate,
-    NewBalance,
 )
 from typing import Annotated
 from app.routes import get_current_user
+from sqlalchemy import select
+from app.services import create_yookaassa_payment
 
 user_router = APIRouter(prefix="/users", tags=["USERS"])
 
@@ -38,17 +40,39 @@ async def delete_user(db: DBsession, user: Annotated[User, Depends(get_current_u
     await db.commit()
 
 
-@user_router.post("/me/balance", response_model=NewBalance)
+@user_router.post("/me/balance")
 async def update_balance(
     db: DBsession,
     update_schema: BalanceUpdate,
     user: Annotated[User, Depends(get_current_user)],
 ):
-    """
-    For now, the scheme is implemented with any amount of money; the YUKassa API will be added later.
-    Stay tuned for updates!
-    """
-    user.balance += update_schema.update_amount
+    # check that the user has not updated their balance in the last 5 seconds
+
+    payment = await db.scalar(
+        select(Payment).where(
+            Payment.user_id == user.id,
+            Payment.status == PaymentStatus.pending,
+        )
+    )
+    if payment:
+        return payment.payment_url
+
+    new_payment = Payment(
+        user_id=user.id,
+        amount=update_schema.update_amount,
+    )
+    db.add(new_payment)
+    await db.flush()
+
+    try:
+        yookassa_id, new_url = await create_yookaassa_payment(
+            db, new_payment.amount, new_payment.id
+        )
+        new_payment.payment_url = new_url
+        new_payment.yookassa_id = yookassa_id
+    except Exception:
+        raise HTTPException(503, detail=f"Payment provider error")
+
     await db.commit()
-    await db.refresh(user)
-    return NewBalance(balance=user.balance)
+
+    return new_url

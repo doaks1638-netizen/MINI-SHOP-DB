@@ -10,6 +10,7 @@ from .admin_actions.order_admin import admin_order_router
 from .admin_actions.product_admin import admin_product_router
 from .admin_actions.category_admin import admin_category_router
 from .creator_actions.creator_actions import creator_router
+from .payments import payment_router
 from fastapi import APIRouter
 
 v1_router = APIRouter(prefix="/api/v1")
@@ -25,3 +26,4 @@ v1_router.include_router(admin_order_router)
 v1_router.include_router(admin_product_router)
 v1_router.include_router(creator_router)
 v1_router.include_router(admin_category_router)
+v1_router.include_router(payment_router)

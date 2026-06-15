@@ -35,13 +35,18 @@ export default function ProfilePage() {
     }
     setTopUpLoading(true);
     try {
-      const result = await api.post('/users/me/balance', { update_amount: amount });
-      toast.success(`Баланс пополнен! Новый баланс: ₽${Number(result.balance).toLocaleString('ru-RU')}`);
-      await refreshUser();
-      setTopUpAmount('');
+      const url = await api.post('/users/me/balance', { update_amount: amount });
+      if (typeof url === 'string' && url.startsWith('http')) {
+        toast.info('Перенаправление на страницу оплаты ЮKassa...', { duration: 3000 });
+        setTimeout(() => {
+          window.location.href = url;
+        }, 800);
+      } else {
+        toast.error('Не удалось получить ссылку на оплату');
+        setTopUpLoading(false);
+      }
     } catch (err) {
       toast.error(err.message);
-    } finally {
       setTopUpLoading(false);
     }
   };
@@ -129,9 +134,11 @@ export default function ProfilePage() {
         </div>
 
         {/* Top-up Card */}
-        <div className="profile-card card">
-          <h3 className="profile-card-title">💳 Пополнить баланс</h3>
-          <p className="profile-card-desc">Добавьте средства на ваш счёт для покупок</p>
+        <div className="profile-card card topup-card-premium">
+          <div className="topup-card-header">
+            <h3 className="profile-card-title gradient-text">✨ Пополнить баланс</h3>
+            <p className="profile-card-desc">Без комиссии • Моментальное зачисление через ЮKassa</p>
+          </div>
           <div className="topup-form">
             <div className="topup-presets">
               {[100, 500, 1000, 5000].map(val => (

@@ -116,7 +116,34 @@
   color: var(--accent-green);
 }
 
-/* Top-up */
+/* Top-up Premium Styling */
+.topup-card-premium {
+  position: relative;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  overflow: hidden;
+}
+
+.topup-card-premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+  transition: 0.5s;
+  pointer-events: none;
+}
+
+.topup-card-premium:hover::before {
+  left: 100%;
+}
+
+.topup-card-header {
+  margin-bottom: var(--space-lg);
+}
+
 .topup-form {
   display: flex;
   flex-direction: column;
@@ -129,19 +156,63 @@
   flex-wrap: wrap;
 }
 
+.topup-presets .btn {
+  flex: 1;
+  min-width: calc(25% - var(--space-sm));
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  border-radius: var(--radius-lg);
+}
+
+.topup-presets .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+}
+
 .topup-presets .btn-active {
-  background: rgba(139, 92, 246, 0.15);
-  border-color: rgba(139, 92, 246, 0.3);
-  color: var(--accent-violet);
+  background: linear-gradient(135deg, var(--accent-violet), var(--accent-blue));
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+  transform: translateY(-2px);
 }
 
 .topup-input-group {
   display: flex;
   gap: var(--space-sm);
+  align-items: center;
+  background: rgba(0, 0, 0, 0.1);
+  padding: var(--space-xs);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .topup-input-group .input {
   flex: 1;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-size: var(--font-lg);
+  font-weight: 600;
+  padding-left: var(--space-sm);
+}
+
+.topup-input-group .input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.topup-input-group .btn-primary {
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-xl);
+  height: 44px;
+  background: linear-gradient(135deg, var(--accent-violet), var(--accent-blue));
+  transition: all 0.3s ease;
+}
+
+.topup-input-group .btn-primary:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
 }
 
 /* Danger */
