@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     YOOKASSA_SHOP_ID: int
     YOOKASSA_SECRET_KEY: str
-    YOOKASSA_RETURN_URL: str = "http://localhost:8000/"
+    YOOKASSA_RETURN_URL: str = "http://localhost:3000/"
 
 
 settings = Settings()  # make settings singleton
