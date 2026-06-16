@@ -12,7 +12,7 @@
 
 ## 🚀 Быстрый старт
 
-### 1 Запуск Backend (FastAPI)
+### 1. Запуск Backend (FastAPI)
 Убедитесь, что у вас установлен Python 3.12+ и настроены переменные окружения.
 
 ```bash
@@ -22,8 +22,7 @@ uvicorn app.routes.app:app --reload
 
 API будет доступно по адресу: http://localhost:8000
 
-### 2 Запуск Frontend (React + Vite)
-
+### 2. Запуск Frontend (React + Vite)
 Убедитесь, что у вас установлен Node.js.
 
 ```bash
@@ -36,7 +35,14 @@ npm run dev
 
 ## 🛠️ Стек технологий
 
-• Backend: Python 3.12, FastAPI, SQLAlchemy, Alembic, AsyncPG, JWT-авторизация
-• Frontend: React 19, Vite, React Router DOM
-• База данных: PostgreSQL
-• Менеджер пакетов: uv (backend) / npm (frontend)
+- Backend: Python 3.12, FastAPI, SQLAlchemy, Alembic, AsyncPG, JWT-авторизация
+- Frontend: React 19, Vite, React Router DOM
+- База данных: PostgreSQL
+- Менеджер пакетов: uv (backend) / npm (frontend)
+
+## 🔥 Реализованные функции
+
+- Аунтификация при помощи Google, JWT токены
+- Возможность оплаты по Yookassa
+- FTS (Full Text Search) для продуктов - очень быстро!
+- Возможность загрузки изображений для товаров
