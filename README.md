@@ -1,48 +1,68 @@
-# 🛒 Mini Shop DB
+# MINI SHOP DB
 
-<p align="left">
-  <img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" alt="FastAPI" />
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
-  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
-  <img src="https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite" />
-</p>
+Full-stack e-commerce platform with integrated payment system and comprehensive product management.
 
-Современное веб-приложение для управления небольшим магазином. Проект состоит из быстрого API на **FastAPI** и современного интерфейса на **React (Vite)**.
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat-square&logo=fastapi&logoColor=white)
+![Python](https://img.shields.io/badge/Python%203.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white)
+![React](https://img.shields.io/badge/React%2019-282C34?style=flat-square&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-black?style=flat-square)
 
-## 🚀 Быстрый старт
+## Technology Stack
 
-### 1. Запуск Backend (FastAPI)
-Убедитесь, что у вас установлен Python 3.12+ и настроены переменные окружения.
+| Layer | Technology |
+|-------|-----------|
+| Backend | FastAPI, SQLAlchemy 2.0, AsyncPG, Python 3.12 |
+| Frontend | React 19, Vite, React Router |
+| Database | PostgreSQL with Full Text Search |
+| Deployment | Docker, Docker Compose, Nginx |
+| Authentication | Google OAuth 2.0, JWT |
+| Payments | Yookassa (ЮКасса) |
+
+## Key Features
+
+- OAuth 2.0 authentication with Google integration
+- Payment processing with Yookassa
+- Full-text search for product catalog
+- Shopping cart and order management
+- Product media management
+- Inventory tracking
+- Real-time payment status monitoring
+
+## Quick Start
+
+### Requirements
+
+- Docker 20.10+
+- Docker Compose 1.29+
+- Git
+
+### Installation
 
 ```bash
-# Запуск сервера
-uvicorn app.routes.app:app --reload
+git clone https://github.com/doaks1638-netizen/MINI-SHOP-DB.git --depth 1
+cd MINI-SHOP-DB
+docker compose up -d --build
 ```
 
-API будет доступно по адресу: http://localhost:8000
+## Project Structure
 
-### 2. Запуск Frontend (React + Vite)
-Убедитесь, что у вас установлен Node.js.
-
-```bash
-cd frontend
-npm install
-npm run dev
+```
+MINI-SHOP-DB/
+├── app/                # Backend API
+│   ├── models/        # Database models
+│   ├── schemas/       # Pydantic validation
+│   ├── routes/        # API endpoints
+│   ├── services/      # Business logic
+│   └── media/         # Media handling
+├── frontend/           # React application
+├── alembic/           # Database migrations
+├── nginx/             # Nginx configuration
+└── docker-compose.yml # Container orchestration
 ```
 
-Интерфейс будет доступен по адресу: http://localhost:5173
+## License
 
-## 🛠️ Стек технологий
-
-- Backend: Python 3.12, FastAPI, SQLAlchemy, Alembic, AsyncPG, JWT-авторизация
-- Frontend: React 19, Vite, React Router DOM
-- База данных: PostgreSQL
-- Менеджер пакетов: uv (backend) / npm (frontend)
-
-## 🔥 Реализованные функции
-
-- Аунтификация при помощи Google, JWT токены
-- Возможность оплаты по Yookassa
-- FTS (Full Text Search) для продуктов - очень быстро!
-- Возможность загрузки изображений для товаров
+MIT
