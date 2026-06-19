@@ -6,3 +6,4 @@ test.md
 .ruff_cache/
 .stfolder
 .ruff_errors.txt
+.idea/

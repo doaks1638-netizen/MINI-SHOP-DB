@@ -20,6 +20,7 @@ dependencies = [
     "python-multipart>=0.0.32",
     "fastapi-sso>=0.21.0",
     "yookassa>=3.10.1",
+    "gunicorn>=26.0.0",
 ]
 
 [tool.ruff.lint]

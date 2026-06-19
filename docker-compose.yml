@@ -1,0 +1,83 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./Dockerfile # билд зависимостей 
+    command: uv run gunicorn app.routes.app:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+    # не прокидываем порты, этим будет заниматься nginx
+    develop:
+      watch:
+        - action: sync
+          path: ./app
+          target: /mini_shop_db/app
+
+        - action: sync
+          path: ./media
+          target: /mini_shop_db/media
+
+        - action: rebuild
+          path: .env
+
+        - action: rebuild
+          path: ./alembic
+    depends_on:
+      # старт только когда запустилась бд
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: node:20-alpine
+    container_name: vite_frontend
+    working_dir: /mini_shop_db/frontend
+    # 1. Сначала ставим зависимости (если папка node_modules пуста), а потом запускаем dev-сервер
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    # Монтируем корень проекта, чтобы Node видел папку frontend
+    volumes:
+      - .:/mini_shop_db
+    develop:
+      watch:
+        # Следим за изменениями фронта для hot-reload
+        - action: sync
+          path: ./frontend
+          target: /mini_shop_db/frontend
+
+  db:
+    image: postgres:16.4
+    container_name: postgres_db
+    restart: always # упала — Docker сам поднимет
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pg_data:/var/lib/postgresql/data # данные переживут down
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_ui
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      # старт только когда запустилась бд
+      db:
+        condition: service_healthy
+
+  nginx:
+    build: nginx                        
+    volumes:
+      # Заменяем media_data на прямой путь к папке ./media
+      - ./media:/var/www/media:ro       
+    ports:
+      - 80:80                           
+    depends_on:
+      - web
+volumes:
+  pg_data:
