@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.v1 import v1_router
 from fastapi.staticfiles import StaticFiles
+from app.settings import settings
 
 app = FastAPI(title="MINI-SHOP-DB")
 
@@ -15,4 +16,4 @@ app.add_middleware(
 
 app.include_router(v1_router)
 
-app.mount("/media", StaticFiles(directory="media"), name="media")
+app.mount("/media", StaticFiles(directory=str(settings.BASE_DIR / "media")), name="media")

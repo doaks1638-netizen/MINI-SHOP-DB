@@ -2,7 +2,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 from datetime import timedelta
 
-parent_path = Path(__file__).parent.parent  # path to .env file in project path
+# path to .env file — works both in Docker (/mini_shop_db/) and local dev (project root)
+_here = Path(__file__).parent.parent  # backend/
+parent_path = _here if (_here / ".env").exists() else _here.parent
 
 
 class Settings(BaseSettings):

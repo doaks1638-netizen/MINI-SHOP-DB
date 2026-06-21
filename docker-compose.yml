@@ -2,7 +2,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: ./Dockerfile # билд зависимостей 
+      dockerfile: ./backend/Dockerfile # билд зависимостей 
     command: uv run gunicorn app.routes.app:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
     # Docker DNS резолвит api.yookassa.ru на нерабочий IP, используем публичные DNS
     dns:
@@ -12,18 +12,18 @@ services:
     develop:
       watch:
         - action: sync
-          path: ./app
+          path: ./backend/app
           target: /mini_shop_db/app
 
         - action: sync
-          path: ./media
+          path: ./backend/media
           target: /mini_shop_db/media
 
         - action: rebuild
           path: .env
 
         - action: rebuild
-          path: ./alembic
+          path: ./backend/alembic
     depends_on:
       # старт только когда запустилась бд
       db:
@@ -91,8 +91,8 @@ services:
       - "443:443"
     volumes:
       # Важно: конфиг монтируем именно в папку user_conf.d
-      - ./nginx/nginx.conf:/etc/nginx/user_conf.d/app.conf:ro
-      - ./media:/var/www/media:ro
+      - ./backend/nginx/nginx.conf:/etc/nginx/user_conf.d/app.conf:ro
+      - ./backend/media:/var/www/media:ro
       - letsencrypt_data:/etc/letsencrypt # Здесь докер сам будет хранить сертификаты
     depends_on:
       - web

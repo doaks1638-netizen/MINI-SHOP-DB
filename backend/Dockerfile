@@ -7,11 +7,12 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /mini_shop_db
 
-COPY pyproject.toml uv.lock ./
+COPY backend/pyproject.toml backend/uv.lock ./
 
 RUN uv sync --frozen --no-cache
 
-COPY . /mini_shop_db/
+COPY backend/ /mini_shop_db/
+COPY .env /mini_shop_db/
 
 ENTRYPOINT [ "./prestart.sh" ]
 
