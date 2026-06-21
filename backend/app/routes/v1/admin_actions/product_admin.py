@@ -112,7 +112,7 @@ async def create_new_product(
     new_data = new_product.model_dump()
     new_data["image_url"] = image_url
 
-    stmt = insert(Product).values(**new_product.model_dump())
+    stmt = insert(Product).values(**new_data)
     await db.execute(stmt)
     await db.commit()
 
