@@ -34,6 +34,9 @@ services:
     # Монтируем корень проекта, чтобы Node видел папку frontend
     volumes:
       - .:/mini_shop_db
+      # Анонимный volume перекрывает хостовый node_modules —
+      # контейнер установит свои нативные бинарники (esbuild, rollup и т.д.)
+      - /mini_shop_db/frontend/node_modules
     develop:
       watch:
         # Следим за изменениями фронта для hot-reload
