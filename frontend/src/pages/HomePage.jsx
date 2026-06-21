@@ -39,7 +39,7 @@ export default function HomePage() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const data = await api.get('/categories?page=1');
+      const data = await api.get('/categories/', { page: 1 });
       setCategories(data);
     } catch {
       // Ignore

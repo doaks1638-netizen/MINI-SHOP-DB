@@ -40,7 +40,7 @@ export default function AdminProducts() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const data = await api.get('/categories?page=1');
+      const data = await api.get('/admin/categories/', { active_filter: 'all', page: 1 });
       setCategories(data);
     } catch { /* ignore */ }
   }, []);
