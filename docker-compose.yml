@@ -71,13 +71,21 @@ services:
         condition: service_healthy
 
   nginx:
-    build: nginx                        
-    volumes:
-      # Заменяем media_data на прямой путь к папке ./media
-      - ./media:/var/www/media:ro       
+    image: jonasal/nginx-certbot:latest
+    restart: always
+    environment:
+      # Образ сам всё прочитает и запросит сертификаты на этот email
+      - CERTBOT_EMAIL=${DOMAIN_EMAIL}
     ports:
-      - 80:80                           
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Важно: конфиг монтируем именно в папку user_conf.d
+      - ./nginx/nginx.conf:/etc/nginx/user_conf.d/app.conf:ro
+      - ./media:/var/www/media:ro
+      - letsencrypt_data:/etc/letsencrypt # Здесь докер сам будет хранить сертификаты
     depends_on:
       - web
 volumes:
   pg_data:
+  letsencrypt_data:

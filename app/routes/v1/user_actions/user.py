@@ -71,7 +71,7 @@ async def update_balance(
         new_payment.payment_url = new_url
         new_payment.yookassa_id = yookassa_id
     except Exception:
-        raise HTTPException(503, detail=f"Payment provider error")
+        raise HTTPException(503, detail="Payment provider error")
 
     await db.commit()
 
