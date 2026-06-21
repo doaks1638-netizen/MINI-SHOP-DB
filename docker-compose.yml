@@ -4,6 +4,10 @@ services:
       context: .
       dockerfile: ./Dockerfile # билд зависимостей 
     command: uv run gunicorn app.routes.app:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+    # Docker DNS резолвит api.yookassa.ru на нерабочий IP, используем публичные DNS
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     # не прокидываем порты, этим будет заниматься nginx
     develop:
       watch:
