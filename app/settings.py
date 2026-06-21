@@ -27,7 +27,7 @@ class Settings(BaseSettings):
 
     CLIENT_SECRET: str
     CLIENT_ID: str
-    REDIRECT_URL: str = "http://localhost:8000/api/v1/auth/google/callback"
+    REDIRECT_URL: str
 
     model_config = SettingsConfigDict(
         extra="ignore",
@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     YOOKASSA_SHOP_ID: int
     YOOKASSA_SECRET_KEY: str
-    YOOKASSA_RETURN_URL: str = "http://localhost:3000/"
+    YOOKASSA_RETURN_URL: str
 
 
 settings = Settings()  # make settings singleton
