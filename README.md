@@ -44,6 +44,14 @@ Full-stack e-commerce platform with integrated payment system and comprehensive 
 ```bash
 git clone https://github.com/doaks1638-netizen/MINI-SHOP-DB.git --depth 1
 cd MINI-SHOP-DB
+```
+⬇
+```bash
+touch .env
+vim .env
+```
+⬇
+```bash
 docker compose up -d --build
 ```
 
