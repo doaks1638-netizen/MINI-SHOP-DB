@@ -6,7 +6,7 @@ from uuid import uuid4
 MEDIA_PRODUCTS_DIR = settings.BASE_DIR / "media" / "products"
 MEDIA_PRODUCTS_DIR.mkdir(exist_ok=True, parents=True)
 ALLOWED_PRODUCT_MIME_TYPES = {"image/jpeg", "image/png", "image/webp"}
-MAX_IMAGE_SIZE = 5 * 1024 * 1024
+MAX_IMAGE_SIZE = 10 * 1024 * 1024
 
 
 async def save_product_image(file: UploadFile) -> str:
