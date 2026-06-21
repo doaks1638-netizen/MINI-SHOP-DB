@@ -26,7 +26,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: node:20-alpine
+    image: node:20-slim
     container_name: vite_frontend
     working_dir: /mini_shop_db/frontend
     # 1. Сначала ставим зависимости (если папка node_modules пуста), а потом запускаем dev-сервер
@@ -89,6 +89,7 @@ services:
       - letsencrypt_data:/etc/letsencrypt # Здесь докер сам будет хранить сертификаты
     depends_on:
       - web
+      - frontend
 volumes:
   pg_data:
   letsencrypt_data:
