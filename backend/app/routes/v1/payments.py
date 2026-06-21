@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, HTTPException
 import ipaddress
 from app.database import DBsession
 from json import JSONDecodeError
-from yookassa.domain.notification import WebhookNotification
+from yookassa.domain.notification import WebhookNotificationFactory
 from sqlalchemy import select
 from app.models import Payment
 from app.models.enums import PaymentStatus
@@ -44,6 +44,9 @@ def check_ip(ip: str | None) -> bool:
 
 
 def _extract_client_ip(request: Request) -> str | None:
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip:
+        return real_ip.strip()
     forwarded_for = request.headers.get("x-forwarded-for")
     if forwarded_for:
         return forwarded_for.split(",")[0].strip()
@@ -63,7 +66,7 @@ async def yookassa_webhook(db: DBsession, request: Request):
         raise HTTPException(400, detail=f"Bad payload. Exception - {exc}")
 
     try:
-        notification = WebhookNotification(payload)
+        notification = WebhookNotificationFactory().create(payload)
     except Exception as exc:
         raise HTTPException(400, detail=f"Bad notification")
 
