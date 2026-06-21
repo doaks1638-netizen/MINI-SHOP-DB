@@ -53,6 +53,7 @@ async def create_category(db: DBsession, new_category: CategoryCreate):
     stmt = stmt.returning(Category)
     rez = await db.scalar(stmt)
     await db.commit()
+    await db.refresh(rez)
     return rez
 
 
