@@ -21,6 +21,7 @@ dependencies = [
     "fastapi-sso>=0.21.0",
     "yookassa>=3.10.1",
     "gunicorn>=26.0.0",
+    "loguru>=0.7.3",
 ]
 
 [tool.ruff.lint]
