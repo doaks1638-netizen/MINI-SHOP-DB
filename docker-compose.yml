@@ -8,6 +8,8 @@ services:
     dns:
       - 8.8.8.8
       - 1.1.1.1
+    volumes:
+      - media_data:/mini_shop_db/media
     # не прокидываем порты, этим будет заниматься nginx
     develop:
       watch:
@@ -92,7 +94,7 @@ services:
     volumes:
       # Важно: конфиг монтируем именно в папку user_conf.d
       - ./backend/nginx/nginx.conf:/etc/nginx/user_conf.d/app.conf:ro
-      - ./backend/media:/var/www/media:ro
+      - media_data:/var/www/media:ro
       - letsencrypt_data:/etc/letsencrypt # Здесь докер сам будет хранить сертификаты
     depends_on:
       - web
@@ -100,3 +102,4 @@ services:
 volumes:
   pg_data:
   letsencrypt_data:
+  media_data:
