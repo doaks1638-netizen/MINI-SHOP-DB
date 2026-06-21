@@ -251,7 +251,7 @@ export default function AdminProducts() {
             <input 
               type="file" 
               className="input" 
-              accept="image/png, image/jpeg" 
+              accept="image/png, image/jpeg, image/webp" 
               onChange={e => setForm({ ...form, picture_file: e.target.files[0] })} 
             />
             {editingProduct?.image_url && !form.picture_file && (
