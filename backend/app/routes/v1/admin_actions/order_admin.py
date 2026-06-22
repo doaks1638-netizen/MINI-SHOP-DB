@@ -79,7 +79,7 @@ async def delete_order(db: DBsession, order_id: UUID):
     order = await db.scalar(stmt)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    order.status = OrderStatus.cancelled
     await update_amount(db, order.product_id, order.amount)
     await debit_funds(db, order.user_id, (order.price_for_one * order.amount))
+    order.status = OrderStatus.cancelled
     await db.commit()

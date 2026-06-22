@@ -31,12 +31,12 @@ async def create_order(
 
     actual_price = product.price
 
-    new_order = Order(user_id=user_id, price_for_one=actual_price, **order.model_dump())
-    db.add(new_order)
-
     await update_amount(db, order.product_id, -order.amount)
 
     await debit_funds(db, user_id, -(actual_price * order.amount))
+
+    new_order = Order(user_id=user_id, price_for_one=actual_price, **order.model_dump())
+    db.add(new_order)
 
     await db.flush()
 
@@ -82,9 +82,9 @@ async def delete_my_order(
     order = await db.scalar(stmt)
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    order.status = OrderStatus.cancelled
     await update_amount(db, order.product_id, order.amount)
     await debit_funds(db, order.user_id, (order.price_for_one * order.amount))
+    order.status = OrderStatus.cancelled
     await db.commit()
 
 
