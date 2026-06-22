@@ -29,15 +29,15 @@ services:
         condition: service_healthy
 
   frontend:
-    restart: unless-stopped
     image: node:20-slim
     container_name: vite_frontend
     working_dir: /mini_shop_db/frontend
     # 1. Сначала ставим зависимости (если папка node_modules пуста), а потом запускаем dev-сервер
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    command: sh -c "npm install && npm run build"
     # Монтируем корень проекта, чтобы Node видел папку frontend
     volumes:
       - .:/mini_shop_db
+      - dist:./dist
       # Анонимный volume перекрывает хостовый node_modules —
       # контейнер установит свои нативные бинарники (esbuild, rollup и т.д.)
       - /mini_shop_db/frontend/node_modules
@@ -91,6 +91,7 @@ services:
       - ./backend/nginx/nginx.conf:/etc/nginx/user_conf.d/app.conf:ro
       - media_data:/var/www/media:ro
       - letsencrypt_data:/etc/letsencrypt # Здесь докер сам будет хранить сертификаты
+      - dist:/var/www/dist
     depends_on:
       - web
       - frontend
@@ -98,3 +99,4 @@ volumes:
   pg_data:
   letsencrypt_data:
   media_data:
+  dist:
