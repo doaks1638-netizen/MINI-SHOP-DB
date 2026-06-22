@@ -1,5 +1,6 @@
 services:
   web:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: ./backend/Dockerfile # билд зависимостей 
@@ -28,6 +29,7 @@ services:
         condition: service_healthy
 
   frontend:
+    restart: unless-stopped
     image: node:20-slim
     container_name: vite_frontend
     working_dir: /mini_shop_db/frontend
@@ -63,6 +65,7 @@ services:
       retries: 3
 
   pgadmin:
+    restart: unless-stopped
     image: dpage/pgadmin4
     container_name: pgadmin_ui
     environment:
