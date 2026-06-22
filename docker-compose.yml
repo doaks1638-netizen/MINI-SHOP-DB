@@ -1,4 +1,4 @@
-9services:
+services:
   web:
     build:
       context: .
