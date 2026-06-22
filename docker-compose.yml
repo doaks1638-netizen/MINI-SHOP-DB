@@ -1,4 +1,4 @@
-services:
+9services:
   web:
     build:
       context: .
@@ -80,9 +80,6 @@ services:
     environment:
       # Образ сам всё прочитает и запросит сертификаты на этот email
       - CERTBOT_EMAIL=${DOMAIN_EMAIL}
-      # Для первого запуска используем staging-серверы Let's Encrypt,
-      # чтобы не упереться в rate limit. Когда всё заработает — убрать эту строку.
-      # - STAGING=1
     ports:
       - "80:80"
       - "443:443"
