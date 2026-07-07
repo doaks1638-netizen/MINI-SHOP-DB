@@ -8,6 +8,7 @@ parent_path = _here if (_here / ".env").exists() else _here.parent
 
 
 class Settings(BaseSettings):
+    # -------------------------- DB -----------------------
     DB_USER: str
     DB_PASS: str
     DB_HOST: str
@@ -18,6 +19,8 @@ class Settings(BaseSettings):
 
     def get_db_url(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+    # -------------------------- JWT -----------------------
 
     ACCESS_TOKEN_TIME: timedelta = timedelta(hours=1)
     REFRESH_TOKEN_TIME: timedelta = timedelta(days=30)
@@ -31,18 +34,20 @@ class Settings(BaseSettings):
     CLIENT_ID: str
     REDIRECT_URL: str
 
+    BASE_DIR: Path = Path(__file__).parent.parent
+
+    # -------------------------- YOOKASSA -----------------------
+
+    YOOKASSA_SHOP_ID: int
+    YOOKASSA_SECRET_KEY: str
+    YOOKASSA_RETURN_URL: str
+
     model_config = SettingsConfigDict(
         extra="ignore",
         env_file=parent_path / ".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
     )
-
-    BASE_DIR: Path = Path(__file__).parent.parent
-
-    YOOKASSA_SHOP_ID: int
-    YOOKASSA_SECRET_KEY: str
-    YOOKASSA_RETURN_URL: str
 
 
 settings = Settings()  # make settings singleton

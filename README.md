@@ -4,6 +4,7 @@ Full-stack e-commerce platform with integrated payment system and comprehensive 
 
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat-square&logo=fastapi&logoColor=white)
 ![Python](https://img.shields.io/badge/Python%203.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![Pytest](https://img.shields.io/badge/Pytest-000000?style=flat-square&logo=pytest&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white)
 ![React](https://img.shields.io/badge/React%2019-282C34?style=flat-square&logo=react&logoColor=61DAFB)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
@@ -70,6 +71,16 @@ MINI-SHOP-DB/
 ├── nginx/             # Nginx configuration
 └── docker-compose.yml # Container orchestration
 ```
+
+## For Developers
+
+- After modifying the code, you can run the tests using this command:
+
+```bash
+sudo docker compose --env-file .env.test -f docker-compose.test.yaml up --build --abort-on-container-exit && sudo docker compose -f docker-compose.test.yaml down -v
+```
+
+- To change the test execution parameters, modify `docker-compose.test.yaml` -> `web` -> `command`:
 
 ## License
 
