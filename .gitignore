@@ -1,5 +1,6 @@
 *.env
 .env.test
+docker.env
 test.md
 *__pycache__
 .venv/

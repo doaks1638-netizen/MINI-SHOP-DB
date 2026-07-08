@@ -48,7 +48,7 @@ cd MINI-SHOP-DB
 ```
 ⬇
 ```bash
-touch .env
+mv .env.example .env
 vim .env
 ```
 ⬇
@@ -75,9 +75,15 @@ MINI-SHOP-DB/
 ## For Developers
 
 - After modifying the code, you can run the tests using this command:
+- !!! INFO I strongly advise against altering the logic or adding volumes for the test data; instead, use the `-v` flag and avoid errors related to database creation and deletion.
 
 ```bash
-sudo docker compose --env-file .env.test -f docker-compose.test.yaml up --build --abort-on-container-exit && sudo docker compose -f docker-compose.test.yaml down -v
+mv .env.test.example .env.test
+vim .env
+```
+
+```bash
+sudo docker compose --env-file .env.test -f docker-compose.test.yaml up --build --abort-on-container-exit; sudo docker compose -f docker-compose.test.yaml down -v
 ```
 
 - To change the test execution parameters, modify `docker-compose.test.yaml` -> `web` -> `command`:

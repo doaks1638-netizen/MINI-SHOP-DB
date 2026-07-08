@@ -15,7 +15,7 @@ admin_cart_router = APIRouter(
 
 
 @admin_cart_router.get("/", response_model=list[AdminCart])
-async def get_all_carts(db: DBsession, page: page_number):
+async def get_all_carts(db: DBsession, page: page_number = 1):
     query = (
         select(
             CartItem.user_id,
@@ -35,7 +35,7 @@ async def get_all_carts(db: DBsession, page: page_number):
 
 
 @admin_cart_router.get("/{user_id}", response_model=list[AdminCartItemDTO])
-async def get_user_cart(db: DBsession, page: page_number, user_id: UUID):
+async def get_user_cart(db: DBsession, user_id: UUID, page: page_number = 1):
     query = (
         select(
             CartItem.product_id, CartItem.amount, User.is_active.label("is_user_active")

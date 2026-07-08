@@ -16,7 +16,7 @@ admin_user_router = APIRouter(
 @admin_user_router.get("/", response_model=list[AdminUserDTOCount])
 async def get_users(
     db: DBsession,
-    page: page_number,
+    page: page_number = 1,
     roles: Annotated[list[UserRole] | None, Query()] = None,
 ):
     stmt = (
@@ -62,7 +62,7 @@ async def delete_user(db: DBsession, user: user_depends):
 
 
 @admin_user_router.get("/{user_id}/orders", response_model=list[AdminOrderDTO])
-async def get_user_orders(db: DBsession, page: page_number, user: user_depends):
+async def get_user_orders(db: DBsession, user: user_depends, page: page_number = 1):
     orders_stmt = (
         select(
             Order.product_id,

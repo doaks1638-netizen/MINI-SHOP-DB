@@ -20,7 +20,7 @@ admin_category_router = APIRouter(
 @admin_category_router.get("/", response_model=list[AdminCategoryDTO])
 async def get_categories(
     db: DBsession,
-    page: page_number,
+    page: page_number = 1,
     active_filter: Annotated[ActiveFilter, Query()] = ActiveFilter.all,
 ):
     stmt = select(Category)

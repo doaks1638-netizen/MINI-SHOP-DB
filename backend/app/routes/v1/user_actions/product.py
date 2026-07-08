@@ -15,7 +15,7 @@ product_router = APIRouter(prefix="/products", tags=["PRODUCTS"])
 @product_router.get("/", response_model=list[ProductDTO])
 async def get_all_products(
     db: DBsession,
-    page: page_number,
+    page: page_number = 1,
     category_id: Annotated[UUID | None, Query()] = None,
     search: Annotated[str | None, Query()] = None,
     price_filter: Annotated[PriceFilter | None, Query()] = None,

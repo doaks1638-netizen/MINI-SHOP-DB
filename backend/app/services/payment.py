@@ -9,8 +9,7 @@ from fastapi import HTTPException
 from uuid import UUID
 
 
-async def create_yookaassa_payment(db: AsyncSession, amount: Decimal, idempotency_key):
-
+async def create_yookaassa_payment(amount: Decimal, idempotency_key):
     Configuration.account_id = settings.YOOKASSA_SHOP_ID
     Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
 

@@ -52,6 +52,7 @@ async def create_one_order(
     rez = await create_order(db, order, user.id)
 
     await db.commit()
+    await db.refresh(rez)
     return rez
 
 
@@ -116,8 +117,8 @@ async def create_order_from_cart(
 @order_router.get("/", response_model=list[OrderDTO])
 async def get_all_orders(
     db: DBsession,
-    page: page_number,
     user: Annotated[User, Depends(get_current_user)],
+    page: page_number = 1,
     date_filter: Annotated[DateFilter, Query()] = DateFilter.new,
     status_filter: Annotated[list[OrderStatus] | None, Query()] = None,
 ):

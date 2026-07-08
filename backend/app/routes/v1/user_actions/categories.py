@@ -13,7 +13,7 @@ category_router = APIRouter(tags=["CATEGORIES"], prefix="/categories")
 @category_router.get("/", response_model=list[CategoryDTO])
 async def get_categories(
     db: DBsession,
-    page: page_number,
+    page: page_number = 1,
 ):
     stmt = (
         select(Category)

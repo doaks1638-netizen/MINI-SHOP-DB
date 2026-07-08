@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from app.models import Category, Product
 from app.database import DBsession
-from app.schemas import ProductCreate, ProductPatch
+from app.schemas import ProductCreate, ProductPatch, ProductDTO
 from sqlalchemy import select, and_, insert, update, or_, desc, func
 from uuid import UUID
 from app.routes import get_current_admin
@@ -20,7 +20,7 @@ admin_product_router = APIRouter(
 @admin_product_router.get("/", response_model=list[ProductDTO])
 async def get_all_products(
     db: DBsession,
-    page: page_number,
+    page: page_number = 1,
     category_id: Annotated[UUID, Query()] = None,
     search: Annotated[str | None, Query()] = None,
     active_filter: Annotated[ActiveFilter, Query()] = ActiveFilter.all,
@@ -89,7 +89,7 @@ async def get_all_products(
     return rez.scalars().all()
 
 
-@admin_product_router.post("/")
+@admin_product_router.post("/", response_model=ProductDTO)
 async def create_new_product(
     db: DBsession,
     new_product: Annotated[ProductCreate, Depends(ProductCreate.as_form)],
@@ -113,8 +113,12 @@ async def create_new_product(
     new_data["image_url"] = image_url
 
     stmt = insert(Product).values(**new_data)
-    await db.execute(stmt)
+    stmt = stmt.returning(Product)
+    product = await db.scalar(stmt)
     await db.commit()
+    await db.refresh(product)
+    return product
+
 
 
 @admin_product_router.patch("/{product_id}")

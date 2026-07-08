@@ -20,7 +20,7 @@ admin_order_router = APIRouter(
 @admin_order_router.get("/", response_model=list[AdminOrderDTO])
 async def get_all_orders(
     db: DBsession,
-    page: page_number,
+    page: page_number = 1,
     date_filter: Annotated[DateFilter, Query()] = DateFilter.new,
     status_filter: Annotated[list[OrderStatus] | None, Query()] = None,
 ):

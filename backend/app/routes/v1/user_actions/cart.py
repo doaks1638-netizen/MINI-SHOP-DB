@@ -16,8 +16,8 @@ cart_router = APIRouter(tags=["CART"], prefix="/cart")
 @cart_router.get("/", response_model=list[CartItemWithStatus])
 async def get_user_cart(
     db: DBsession,
-    page: page_number,
     user: Annotated[User, Depends(get_current_user)],
+    page: page_number = 1,
     product_id: Annotated[
         UUID, Query()
     ] = None,  # выборка товаров (если в корзине много товаров)
