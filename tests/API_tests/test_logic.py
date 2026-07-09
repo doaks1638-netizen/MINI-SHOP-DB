@@ -48,42 +48,88 @@ async def product_saver(db):
 class TestSorting:
     async def test_FTSearch(self, auth_client, category_saver, product_saver):
         id, auth_client = auth_client
-        category_id = await category_saver()
+        category_id = await category_saver(name="test_FTSearch")
         # test 2 products for search
         await product_saver(
             category_id=category_id,
-            name="LG phone 17 pro MAX",
+            name="TEST LG phone 17 pro MAX",
             price=1000,
             now_amount=100,
             description="test",
         )
         await product_saver(
             category_id=category_id,
-            name='LG Телевизор 65NANO80A6B 65" 4K UHD, черный',
+            name='TEST LG Телевизор 65NANO80A6B 65" 4K UHD, черный',
             price=1000,
             now_amount=100,
             description="test",
         )
-        responce = (await auth_client.get("/api/v1/products/?page=1&search=LG Телевизоры")).json() # default serach
-        assert len(responce) == 1
-        assert responce[0]["name"] == 'LG Телевизор 65NANO80A6B 65" 4K UHD, черный'
         responce = (
-            await auth_client.get("/api/v1/products/?page=1&search=test") # search by description
+            await auth_client.get(
+                "/api/v1/products/", params={"search": "TEST LG Телевизоры"}
+            )
+        ).json()  # default serach
+        assert len(responce) == 1
+        assert responce[0]["name"] == 'TEST LG Телевизор 65NANO80A6B 65" 4K UHD, черный'
+        responce = (
+            await auth_client.get(
+                "/api/v1/products/", params={"search": "test"}
+            )  # search by description
         ).json()
         assert len(responce) == 2
         assert responce[0]["name"] in (
-            'LG Телевизор 65NANO80A6B 65" 4K UHD, черный',
-            "LG phone 17 pro MAX",
+            'TEST LG Телевизор 65NANO80A6B 65" 4K UHD, черный',
+            "TEST LG phone 17 pro MAX",
         )
 
         assert responce[1]["name"] in (
-            'LG Телевизор 65NANO80A6B 65" 4K UHD, черный',
-            "LG phone 17 pro MAX",
+            'TEST LG Телевизор 65NANO80A6B 65" 4K UHD, черный',
+            "TEST LG phone 17 pro MAX",
         )
         responce = (
-            await auth_client.get("/api/v1/products/?page=1&search=LG -phone") 
+            await auth_client.get("/api/v1/products/", params={"search": "LG -phone"})
         ).json()
         assert len(responce) == 1
-        assert responce[0]["name"] == 'LG Телевизор 65NANO80A6B 65" 4K UHD, черный'
+        assert responce[0]["name"] == 'TEST LG Телевизор 65NANO80A6B 65" 4K UHD, черный'
 
-    async def test_query_params(self): ...
+    async def test_query_params(self, auth_client, category_saver, product_saver):
+        id, auth_client = auth_client
+        category_id = await category_saver(name="test_query_params")
+        await product_saver(
+            category_id=category_id,
+            name='TEST Samsung Телевизор 55QE55Q60AAU 55" 4K QLED, серый',
+            price=850,
+            now_amount=45,
+            description="QLED экран, поддержка HDR10+, Smart TV на базе Tizen.",
+        )
+
+        await product_saver(
+            category_id=category_id,
+            name="TEST Apple Смартфон iPhone 15 128GB, черный",
+            price=900,
+            now_amount=120,
+            description="Дисплей Super Retina XDR, чип A16 Bionic, основная камера 48 Мп.",
+        )
+
+        await product_saver(
+            category_id=category_id,
+            name='TEST ASUS Ноутбук Vivobook 15 X1504ZA-BQ102 15.6", синий',
+            price=650,
+            now_amount=30,
+            description="Intel Core i5, 16GB RAM, 512GB SSD, IPS-матрица.",
+        )
+        responce = (
+            await auth_client.get(
+                "/api/v1/products/",
+                params={
+                    "search": "TEST",
+                    "price_filter": "more_expensive",
+                    "category_id": f"{category_id}",
+                },
+            )
+        ).json()
+        assert (
+            sorted(responce, key=lambda x: float(x["price"]), reverse=True) == responce
+        )
+        for product in responce:
+            assert product["category_id"] == str(category_id)
