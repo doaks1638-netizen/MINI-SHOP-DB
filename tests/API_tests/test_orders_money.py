@@ -1,9 +1,9 @@
+from app.models import CartItem, Order, User, Payment
+from app.models.enums import OrderStatus, PaymentStatus
 from fastapi import status
 from uuid6 import uuid7
 from random import randrange
 from sqlalchemy import select
-from app.models import CartItem, Order, User, Payment
-from app.models.enums import OrderStatus, PaymentStatus
 import pytest
 
 
@@ -113,6 +113,3 @@ class TestPayment:
         )
         assert result.status_code == status.HTTP_200_OK
         assert await db.scalar(select(User.balance).where(User.id == id)) == 1500
-
-
-# class TestOrders:
