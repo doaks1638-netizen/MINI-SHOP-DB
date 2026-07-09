@@ -5,14 +5,6 @@ import pytest
 from sqlalchemy import select
 from httpx import ASGITransport, AsyncClient
 
-
-@pytest.fixture(scope="function")
-async def unauthorized_client():
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test/") as client:
-        yield client
-
-
 class TestForbidden:
     async def test_admin_access(self, auth_client):
         id, auth_client = auth_client

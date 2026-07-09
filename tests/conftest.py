@@ -96,3 +96,9 @@ async def auth_admin(db):
     ) as client:
         yield id, client
 
+
+@pytest.fixture(scope="function")
+async def unauthorized_client():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test/") as client:
+        yield client
