@@ -16,18 +16,14 @@ from app.filters import DateFilter
 order_router = APIRouter(prefix="/orders", tags=["ORDERS"])
 
 
-async def create_order(
-    db: DBsession, order: OrderCreate, user_id: UUID, skip_if_not_in_stock: bool = False
-):
+async def create_order(db: DBsession, order: OrderCreate, user_id: UUID):
 
     product = await db.scalar(
         select(Product).where(Product.id == order.product_id, Product.is_active == True)
     )
 
     if not product:
-        if skip_if_not_in_stock:
-            return None
-        raise HTTPException(404, detail="Product not found")
+        return
 
     actual_price = product.price
 
@@ -105,7 +101,7 @@ async def create_order_from_cart(
     ]
 
     for order_create in orders_to_create:
-        await create_order(db, order_create, user_id=user.id, skip_if_not_in_stock=True)
+        await create_order(db, order_create, user_id=user.id)
 
     await db.execute(delete(CartItem).where(CartItem.user_id == user.id))
     await db.commit()

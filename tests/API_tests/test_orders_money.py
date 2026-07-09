@@ -2,7 +2,6 @@ from app.models import CartItem, Order, User, Payment
 from app.models.enums import OrderStatus, PaymentStatus
 from fastapi import status
 from uuid6 import uuid7
-from random import randrange
 from sqlalchemy import select
 import pytest
 
@@ -78,6 +77,49 @@ class TestOrders:
         order_info = {"product_id": product_id, "amount": 1}
         rez = await auth_client.post("/api/v1/orders/", json=order_info)
         assert rez.status_code == status.HTTP_409_CONFLICT
+
+    async def test_сancel_order(self, auth_client, db, new_product):
+        id, auth_client = auth_client
+        product = await new_product()
+        product_id = product["id"]
+        user = await db.scalar(select(User).where(User.id == id))
+        user.balance = 1000
+        await db.commit()
+        order_info = {"product_id": product_id, "amount": 1}
+        response = await auth_client.post("/api/v1/orders/", json=order_info)
+        order_id = response.json()["id"]
+        await auth_client.delete(f"/api/v1/orders/me/{order_id}")
+        await db.refresh(user)
+        assert user.balance == 1000
+
+    async def test_сancel_order_admin(self, auth_admin, db, new_product):
+        id, auth_admin = auth_admin
+        product = await new_product()
+        product_id = product["id"]
+        user = await db.scalar(select(User).where(User.id == id))
+        user.balance = 1000
+        await db.commit()
+        order_info = {"product_id": product_id, "amount": 1}
+        response = await auth_admin.post("/api/v1/orders/", json=order_info)
+        order_id = response.json()["id"]
+        await auth_admin.delete(f"/api/v1/admin/orders/{order_id}")
+        await db.refresh(user)
+        assert user.balance == 1000
+
+    async def test_сancel_order_two_times(self, auth_client, db, new_product):
+        id, auth_client = auth_client
+        product = await new_product()
+        product_id = product["id"]
+        user = await db.scalar(select(User).where(User.id == id))
+        user.balance = 1000
+        await db.commit()
+        order_info = {"product_id": product_id, "amount": 1}
+        response = await auth_client.post("/api/v1/orders/", json=order_info)
+        order_id = response.json()["id"]
+        await auth_client.delete(f"/api/v1/orders/me/{order_id}")
+        await auth_client.delete(f"/api/v1/orders/me/{order_id}")
+        await db.refresh(user)
+        assert user.balance == 1000
 
 
 class TestPayment:

@@ -1,4 +1,3 @@
-from app.models import Product, Category
 import pytest
 from uuid6 import uuid7
 from asyncio import TaskGroup
@@ -9,40 +8,6 @@ from asyncio import TaskGroup
 # a single fixture with `scope='module'` and... Everything breaks because of the `pytest-asyncio` plugin.
 # That is precisely why I opted for this approach.
 # If you now how to fix it -> doaks1638@gmail.com, telegram: @ooopev
-
-
-@pytest.fixture(scope="function")
-async def category_saver(db):
-    async def category_saver_interior(name: str = None):
-        if name is None:
-            name = f"{uuid7()}"
-        category = Category(name=name)
-        db.add(category)
-        await db.commit()
-        await db.refresh(category)
-        return category.id
-
-    return category_saver_interior
-
-
-@pytest.fixture(scope="function")
-async def product_saver(db):
-    async def product_saver_interior(
-        category_id: int, name: str, price: int, now_amount: int, description: str
-    ):
-        product = Product(
-            category_id=category_id,
-            name=name,
-            price=price,
-            now_amount=now_amount,
-            description=description,
-        )
-        db.add(product)
-        await db.commit()
-        await db.refresh(product)
-        return product
-
-    return product_saver_interior
 
 
 class TestSorting:
@@ -64,33 +29,36 @@ class TestSorting:
             now_amount=100,
             description="test",
         )
-        responce = (
+        response = (
             await auth_client.get(
-                "/api/v1/products/", params={"search": "TEST LG Телевизоры"}
+                "/api/v1/products/", params={"search": "TEST LG Телевизоры", "category_id": f"{category_id}"}
             )
         ).json()  # default serach
-        assert len(responce) == 1
-        assert responce[0]["name"] == 'TEST LG Телевизор 65NANO80A6B 65" 4K UHD, черный'
-        responce = (
+        assert len(response) == 1
+        assert response[0]["name"] == 'TEST LG Телевизор 65NANO80A6B 65" 4K UHD, черный'
+        response = (
             await auth_client.get(
-                "/api/v1/products/", params={"search": "test"}
+                "/api/v1/products/", params={"search": "test", "category_id": f"{category_id}"}
             )  # search by description
         ).json()
-        assert len(responce) == 2
-        assert responce[0]["name"] in (
+        assert len(response) == 2
+        assert response[0]["name"] in (
             'TEST LG Телевизор 65NANO80A6B 65" 4K UHD, черный',
             "TEST LG phone 17 pro MAX",
         )
 
-        assert responce[1]["name"] in (
+        assert response[1]["name"] in (
             'TEST LG Телевизор 65NANO80A6B 65" 4K UHD, черный',
             "TEST LG phone 17 pro MAX",
         )
-        responce = (
-            await auth_client.get("/api/v1/products/", params={"search": "LG -phone"})
+        response = (
+            await auth_client.get(
+                "/api/v1/products/",
+                params={"search": "LG -phone", "category_id": f"{category_id}"},
+            )
         ).json()
-        assert len(responce) == 1
-        assert responce[0]["name"] == 'TEST LG Телевизор 65NANO80A6B 65" 4K UHD, черный'
+        assert len(response) == 1
+        assert response[0]["name"] == 'TEST LG Телевизор 65NANO80A6B 65" 4K UHD, черный'
 
     async def test_query_params(self, auth_client, category_saver, product_saver):
         id, auth_client = auth_client
@@ -118,7 +86,7 @@ class TestSorting:
             now_amount=30,
             description="Intel Core i5, 16GB RAM, 512GB SSD, IPS-матрица.",
         )
-        responce = (
+        response = (
             await auth_client.get(
                 "/api/v1/products/",
                 params={
@@ -129,7 +97,7 @@ class TestSorting:
             )
         ).json()
         assert (
-            sorted(responce, key=lambda x: float(x["price"]), reverse=True) == responce
+            sorted(response, key=lambda x: float(x["price"]), reverse=True) == response
         )
-        for product in responce:
+        for product in response:
             assert product["category_id"] == str(category_id)

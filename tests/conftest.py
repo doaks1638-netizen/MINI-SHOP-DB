@@ -4,6 +4,7 @@ from app.models import User, UserSession
 from app.services.security import create_tokens
 from app.settings import settings
 from app.models.enums import UserRole
+from app.models import Product, Category
 import pytest
 from httpx import ASGITransport, AsyncClient
 from uuid6 import uuid7
@@ -102,3 +103,37 @@ async def unauthorized_client():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test/") as client:
         yield client
+
+
+@pytest.fixture(scope="function")
+async def category_saver(db):
+    async def category_saver_interior(name: str = None):
+        if name is None:
+            name = f"{uuid7()}"
+        category = Category(name=name)
+        db.add(category)
+        await db.commit()
+        await db.refresh(category)
+        return category.id
+
+    return category_saver_interior
+
+
+@pytest.fixture(scope="function")
+async def product_saver(db):
+    async def product_saver_interior(
+        category_id: int, name: str, price: int, now_amount: int, description: str
+    ):
+        product = Product(
+            category_id=category_id,
+            name=name,
+            price=price,
+            now_amount=now_amount,
+            description=description,
+        )
+        db.add(product)
+        await db.commit()
+        await db.refresh(product)
+        return product
+
+    return product_saver_interior
