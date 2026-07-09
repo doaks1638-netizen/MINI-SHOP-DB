@@ -21,8 +21,10 @@ class TestAuth:
                     return google_user
 
             return MockSSO()
-
-        app.dependency_overrides[get_google_sso] = mock_get_google_sso
-        responce = await unauthorized_client.get("/api/v1/auth/google/callback")
-        assert responce.status_code == 307
-        assert "/callback?access_token=" in responce.headers['location']
+        try:
+            app.dependency_overrides[get_google_sso] = mock_get_google_sso
+            responce = await unauthorized_client.get("/api/v1/auth/google/callback")
+            assert responce.status_code == 307
+            assert "/callback?access_token=" in responce.headers['location']
+        finally:
+            app.dependency_overrides.clear()
