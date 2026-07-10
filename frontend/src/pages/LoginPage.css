@@ -23,7 +23,7 @@
 .login-orb-1 {
   width: 400px;
   height: 400px;
-  background: var(--accent-violet);
+  background: var(--accent-cyan);
   top: -100px;
   right: -100px;
   animation: float 8s ease-in-out infinite;
@@ -32,7 +32,7 @@
 .login-orb-2 {
   width: 300px;
   height: 300px;
-  background: var(--accent-cyan);
+  background: var(--accent-blue);
   bottom: -50px;
   left: -50px;
   animation: float 10s ease-in-out infinite reverse;
@@ -41,7 +41,7 @@
 .login-orb-3 {
   width: 200px;
   height: 200px;
-  background: var(--accent-pink);
+  background: rgba(34, 211, 238, 0.5); /* cyan variant */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -109,7 +109,7 @@
 
 .login-google-btn:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md), 0 0 30px rgba(139, 92, 246, 0.2);
+  box-shadow: var(--shadow-md), 0 0 30px rgba(34, 211, 238, 0.2);
 }
 
 .login-google-btn:active {
@@ -125,3 +125,4 @@
   font-size: var(--font-xs);
   color: var(--text-muted);
 }
+

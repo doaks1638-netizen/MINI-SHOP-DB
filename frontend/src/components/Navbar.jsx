@@ -1,21 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { HiOutlineShoppingBag, HiOutlineSun, HiOutlineMoon } from 'react-icons/hi';
-import { useState, useEffect } from 'react';
+import { HiOutlineShoppingBag, HiOutlineSearch } from 'react-icons/hi';
 import './Navbar.css';
 
 export default function Navbar({ onToggleSidebar, cartCount = 0 }) {
   const { user, isAuthenticated } = useAuth();
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(t => t === 'dark' ? 'light' : 'dark');
-  };
 
   return (
     <nav className="navbar glass-strong">
@@ -27,22 +16,28 @@ export default function Navbar({ onToggleSidebar, cartCount = 0 }) {
         </button>
         <Link to="/" className="navbar-brand" id="brand-link">
           <span className="navbar-logo gradient-text">M</span>
-          <span className="navbar-title">MINI-SHOP-DB</span>
+          <span className="navbar-title">MINI-SHOP</span>
         </Link>
       </div>
 
+      <div className="navbar-center hide-mobile">
+        <div className="navbar-search">
+          <input type="text" placeholder="Искать товары..." className="input navbar-search-input" />
+          <button className="navbar-search-btn btn-primary">
+            <HiOutlineSearch size={20} />
+          </button>
+        </div>
+      </div>
+
       <div className="navbar-right">
-        <button className="navbar-theme-btn btn-ghost btn-icon" onClick={toggleTheme} title="Toggle theme">
-          {theme === 'dark' ? <HiOutlineSun size={22} /> : <HiOutlineMoon size={22} />}
-        </button>
         {isAuthenticated ? (
           <>
             <Link to="/cart" className="navbar-cart-btn btn-ghost btn-icon" id="cart-nav-btn">
-              <HiOutlineShoppingBag size={22} />
+              <HiOutlineShoppingBag size={24} />
               {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
             </Link>
 
-            <div className="navbar-user" id="user-menu">
+            <Link to="/profile" className="navbar-user" id="user-menu" style={{ textDecoration: 'none' }}>
               <div className="navbar-user-info hide-mobile">
                 <span className="navbar-user-name">{user?.name}</span>
                 <span className="navbar-user-balance">₽{Number(user?.balance || 0).toLocaleString('ru-RU', { minimumFractionDigits: 2 })}</span>
@@ -54,10 +49,10 @@ export default function Navbar({ onToggleSidebar, cartCount = 0 }) {
                   <span>{user?.name?.[0] || '?'}</span>
                 )}
               </div>
-            </div>
+            </Link>
           </>
         ) : (
-          <Link to="/login" className="btn btn-primary" id="login-nav-btn">Sign In</Link>
+          <Link to="/login" className="btn btn-primary" id="login-nav-btn">Войти</Link>
         )}
       </div>
     </nav>

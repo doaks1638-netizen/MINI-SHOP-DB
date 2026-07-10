@@ -6,7 +6,6 @@ import { useToast } from '../context/ToastContext';
 import ProductCard from '../components/ProductCard';
 import CategoryChip from '../components/CategoryChip';
 import Pagination from '../components/Pagination';
-import Loader from '../components/Loader';
 import './HomePage.css';
 
 export default function HomePage() {
@@ -81,36 +80,15 @@ export default function HomePage() {
 
   return (
     <div className="home-page animate-fadeIn">
-      <div className="page-header">
-        <h1>
-          <span className="gradient-text">Каталог</span> товаров
-        </h1>
-        <p>Откройте для себя лучшие товары по доступным ценам</p>
-      </div>
-
-      <div className="home-filters">
-        <div className="home-search-row">
-          <input
-            type="text"
-            className="input home-search"
-            placeholder="Поиск товаров..."
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            id="product-search"
-          />
-          <select 
-            className="input home-sort"
-            value={priceFilter}
-            onChange={(e) => { setPriceFilter(e.target.value); setPage(1); }}
-          >
-            <option value="">По умолчанию</option>
-            <option value="cheaper">Сначала дешевые</option>
-            <option value="more_expensive">Сначала дорогие</option>
-          </select>
-        </div>
-
+      <div className="home-filters-bar">
         {categories.length > 0 && (
-          <div className="home-categories">
+          <div className="home-categories-scroll">
+            <CategoryChip
+              key="all"
+              category={{ id: null, name: 'Все товары' }}
+              isActive={selectedCategory === null}
+              onClick={() => { setSelectedCategory(null); setPage(1); }}
+            />
             {categories.map(cat => (
               <CategoryChip
                 key={cat.id}
@@ -121,10 +99,33 @@ export default function HomePage() {
             ))}
           </div>
         )}
+
+        <div className="home-controls">
+          <input
+            type="text"
+            className="input home-search"
+            placeholder="Искать в категории..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+          <select 
+            className="input home-sort"
+            value={priceFilter}
+            onChange={(e) => { setPriceFilter(e.target.value); setPage(1); }}
+          >
+            <option value="">По популярности</option>
+            <option value="cheaper">Сначала дешевые</option>
+            <option value="more_expensive">Сначала дорогие</option>
+          </select>
+        </div>
       </div>
 
       {loading ? (
-        <Loader size="lg" text="Загрузка товаров..." />
+        <div className="page-grid">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+            <div key={i} className="skeleton" style={{ height: '320px', borderRadius: 'var(--radius-lg)' }} />
+          ))}
+        </div>
       ) : products.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">🛍️</div>
