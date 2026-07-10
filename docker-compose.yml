@@ -53,9 +53,9 @@ services:
     container_name: postgres_db
     restart: always # упала — Docker сам поднимет
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB__USER}
+      POSTGRES_PASSWORD: ${DB__PASS}
+      POSTGRES_DB: ${DB__NAME}
     volumes:
       - pg_data:/var/lib/postgresql/data # данные переживут down
     healthcheck:

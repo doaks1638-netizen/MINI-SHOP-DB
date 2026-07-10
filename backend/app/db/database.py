@@ -1,11 +1,11 @@
-from app.settings import settings
+from backend.app.core.settings import settings
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from fastapi import Depends
 from typing import Annotated, AsyncGenerator
 
 engine = create_async_engine(
     url=settings.get_db_url(),
-    echo=settings.debug,
+    echo=settings.db.DEBUG,
     pool_size=10,
     max_overflow=20,
 )

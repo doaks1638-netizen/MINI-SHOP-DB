@@ -4,9 +4,9 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from typing import Annotated
 from app.models import User
-from app.database import DBsession
+from backend.app.db.database import DBsession
 from app.models.enums import UserRole
-from app.settings import settings
+from backend.app.core.settings import settings
 import jwt
 
 page_number = Annotated[int, Query(gt=0)]
@@ -34,7 +34,7 @@ role_exc = HTTPException(
 async def get_current_user(db: DBsession, token=Depends(oauth_scheme)):
     try:
         payload = jwt.decode(
-            token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM]
+            token, settings.jwt.SECRET_KEY, algorithms=[settings.jwt.ALGORITHM]
         )
         user_id = payload.get("sub")
         token_type = payload.get("token_type")

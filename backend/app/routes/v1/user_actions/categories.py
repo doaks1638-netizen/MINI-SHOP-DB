@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload, with_loader_criteria
 from app.models import Category, Product
-from app.database import DBsession
+from backend.app.db.database import DBsession
 from app.schemas import CategoryRelDTO, CategoryDTO
 from uuid import UUID
 from app.routes import page_number

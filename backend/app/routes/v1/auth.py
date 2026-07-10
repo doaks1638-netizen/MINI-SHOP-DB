@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from app.models import User, UserSession
-from app.database import DBsession
+from backend.app.db.database import DBsession
 from app.routes import (
     exc,
 )
@@ -17,10 +17,10 @@ from sqlalchemy import select
 from uuid import UUID
 from uuid6 import uuid7
 from datetime import datetime, timezone
-from app.settings import settings
+from backend.app.core.settings import settings
 from typing import Annotated
 from fastapi_sso import GoogleSSO
-from app.settings import settings
+from backend.app.core.settings import settings
 from fastapi.responses import RedirectResponse
 
 auth_router = APIRouter(prefix="/auth", tags=["AUTHENTICATION"])
@@ -28,7 +28,7 @@ google_router = APIRouter(prefix="/google", tags=["GOOGLE"])
 
 
 async def get_google_sso():
-    sso = GoogleSSO(settings.CLIENT_ID, settings.CLIENT_SECRET, settings.REDIRECT_URL)
+    sso = GoogleSSO(settings.jwt.CLIENT_ID, settings.jwt.CLIENT_SECRET, settings.jwt.REDIRECT_URL)
     async with sso:
         yield sso
 
@@ -77,7 +77,7 @@ async def google_callback(
     new_session = UserSession(
         user_id=current_user.id,
         active_token_id=token_id,
-        expiration_time=datetime.now(timezone.utc) + settings.REFRESH_TOKEN_TIME,
+        expiration_time=datetime.now(timezone.utc) + settings.jwt.REFRESH_TOKEN_TIME,
     )
     db.add(new_session)
 
@@ -133,7 +133,7 @@ async def refresh_tokens(db: DBsession, refresh_token: RefreshToken):
 
     new_token_id = uuid7()
 
-    session.expiration_time = datetime.now(timezone.utc) + settings.REFRESH_TOKEN_TIME
+    session.expiration_time = datetime.now(timezone.utc) + settings.jwt.REFRESH_TOKEN_TIME
     session.active_token_id = new_token_id
 
     refresh_data = {

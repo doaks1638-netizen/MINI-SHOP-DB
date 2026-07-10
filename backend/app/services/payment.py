@@ -1,6 +1,6 @@
 from yookassa import Configuration, Payment
 from decimal import Decimal
-from app.settings import settings
+from backend.app.core.settings import settings
 from anyio import to_thread
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -10,14 +10,14 @@ from uuid import UUID
 
 
 async def create_yookaassa_payment(amount: Decimal, idempotency_key):
-    Configuration.account_id = settings.YOOKASSA_SHOP_ID
-    Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
+    Configuration.account_id = settings.yookassa.SHOP_ID
+    Configuration.secret_key = settings.yookassa.SECRET_KEY
 
     payment = {
         "amount": {"value": f"{amount:.2f}", "currency": "RUB"},
         "confirmation": {
             "type": "redirect",
-            "return_url": settings.YOOKASSA_RETURN_URL,
+            "return_url": settings.yookassa.RETURN_URL,
         },
         "capture": True,
         "description": "Пополнение баланса пользователя",

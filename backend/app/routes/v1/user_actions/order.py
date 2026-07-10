@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from app.models import CartItem, Order, Product, User
-from app.database import DBsession
+from backend.app.db.database import DBsession
 from sqlalchemy import select, delete
 from sqlalchemy.orm import selectinload
 from app.models.enums import OrderStatus
