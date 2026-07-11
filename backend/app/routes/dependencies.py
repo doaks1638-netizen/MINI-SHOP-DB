@@ -34,7 +34,7 @@ role_exc = HTTPException(
 async def get_current_user(db: DBsession, token=Depends(oauth_scheme)):
     try:
         payload = jwt.decode(
-            token, settings.JWT__SECRET_KEY, algorithms=[settings.JWT__ALGORITHM]
+            token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
         user_id = payload.get("sub")
         token_type = payload.get("token_type")

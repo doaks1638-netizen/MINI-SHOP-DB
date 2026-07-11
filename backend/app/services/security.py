@@ -14,25 +14,25 @@ def create_tokens(access_data: dict, refresh_data: dict):
 
     access_token_data.update(
         {
-            "exp": datetime.now(timezone.utc) + settings.JWT__ACCESS_TOKEN_TIME,
+            "exp": datetime.now(timezone.utc) + settings.JWT_ACCESS_TOKEN_TIME,
             "token_type": "access",
         }
     )
     refresh_token_data.update(
         {
-            "exp": datetime.now(timezone.utc) + settings.JWT__REFRESH_TOKEN_TIME,
+            "exp": datetime.now(timezone.utc) + settings.JWT_REFRESH_TOKEN_TIME,
             "token_type": "refresh",
         }
     )
 
     return {
         "access_token": jwt.encode(
-            access_token_data, key=settings.JWT__SECRET_KEY, algorithm=settings.JWT__ALGORITHM
+            access_token_data, key=settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
         ),
         "refresh_token": jwt.encode(
             refresh_token_data,
-            key=settings.JWT__SECRET_KEY,
-            algorithm=settings.JWT__ALGORITHM,
+            key=settings.JWT_SECRET_KEY,
+            algorithm=settings.JWT_ALGORITHM,
         ),
     }
 
@@ -41,8 +41,8 @@ def decode_refresh_token(refresh_token):
     try:
         payload = jwt.decode(
             refresh_token.token,
-            settings.JWT__SECRET_KEY,
-            algorithms=[settings.JWT__ALGORITHM],
+            settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
         )
         user_id = payload.get("sub")
         session_id = payload.get("session_id")

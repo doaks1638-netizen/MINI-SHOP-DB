@@ -3,9 +3,9 @@ services:
     image: postgres:16.4
     container_name: test_postgres_db
     environment:
-      POSTGRES_USER: ${DB__USER}
-      POSTGRES_PASSWORD: ${DB__PASS}
-      POSTGRES_DB: ${DB__NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
       interval: 5s

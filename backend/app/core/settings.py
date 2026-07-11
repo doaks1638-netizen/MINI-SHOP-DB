@@ -7,29 +7,30 @@ _here = Path(__file__).parent.parent  # app/
 parent_path = _here if (_here / ".env").exists() else _here.parent
 
 
+
 class Settings(BaseSettings):
     # DB
-    DB__USER: str
-    DB__PASS: str
-    DB__HOST: str
-    DB__PORT: int
-    DB__NAME: str
+    DB_USER: str
+    DB_PASS: str
+    DB_HOST: str
+    DB_PORT: int
+    DB_NAME: str
     DEBUG: bool = False
 
     # JWT
-    JWT__SECRET_KEY: str
-    JWT__ALGORITHM: str = "HS256"
-    JWT__ACCESS_TOKEN_TIME: timedelta = timedelta(hours=1)
-    JWT__REFRESH_TOKEN_TIME: timedelta = timedelta(days=30)
-    JWT__MAX_USER_SESSION: int = 10
-    JWT__CLIENT_SECRET: str
-    JWT__CLIENT_ID: str
-    JWT__REDIRECT_URL: str
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_TIME: timedelta = timedelta(hours=1)
+    JWT_REFRESH_TOKEN_TIME: timedelta = timedelta(days=30)
+    JWT_MAX_USER_SESSION: int = 10
+    JWT_CLIENT_SECRET: str
+    JWT_CLIENT_ID: str
+    JWT_REDIRECT_URL: str
 
     # Yookassa
-    YOOKASSA__SHOP_ID: int
-    YOOKASSA__SECRET_KEY: str
-    YOOKASSA__RETURN_URL: str
+    YOOKASSA_SHOP_ID: int
+    YOOKASSA_SECRET_KEY: str
+    YOOKASSA_RETURN_URL: str
 
     # Computed
     BASE_DIR: Path = Path(__file__).parent.parent
@@ -38,11 +39,10 @@ class Settings(BaseSettings):
         extra="ignore",
         env_file=parent_path / ".env",
         env_file_encoding="utf-8",
-        case_sensitive=True,
     )
 
     def get_db_url(self) -> str:
-        return f"postgresql+asyncpg://{self.DB__USER}:{self.DB__PASS}@{self.DB__HOST}:{self.DB__PORT}/{self.DB__NAME}"
+        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 
 settings = Settings()  # make settings singleton
