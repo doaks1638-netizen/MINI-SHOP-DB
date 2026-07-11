@@ -103,13 +103,18 @@ async function apiRequest(endpoint, options = {}) {
     let fields = {};
 
     if (error && typeof error === 'object') {
-      if (Array.isArray(error.detail)) {
-        // Typical Pydantic/FastAPI validation error format
-        msg = 'Ошибка валидации полей';
-        error.detail.forEach(e => {
-          if (e.loc && e.loc.length > 0) {
-            const field = e.loc[e.loc.length - 1]; // get the last element of loc (the field name)
-            fields[field] = e.msg;
+      const detailsArray = Array.isArray(error.details) ? error.details : (Array.isArray(error.detail) ? error.detail : null);
+      
+      if (detailsArray) {
+        msg = error.message || 'Ошибка валидации полей';
+        detailsArray.forEach(e => {
+          if (e.loc) {
+            // Handle both string "body.email" and array ["body", "email"]
+            const locArray = typeof e.loc === 'string' ? e.loc.split('.') : e.loc;
+            if (locArray.length > 0) {
+              const field = locArray[locArray.length - 1];
+              fields[field] = e.msg;
+            }
           }
         });
       } else if (error.detail) {
