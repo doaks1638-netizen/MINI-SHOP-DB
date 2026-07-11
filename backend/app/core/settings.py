@@ -38,7 +38,7 @@ class Settings(BaseSettings):
         extra="ignore",
         env_file=parent_path / ".env",
         env_file_encoding="utf-8",
-        case_sensitive=False,
+        case_sensitive=True,
     )
 
     def get_db_url(self) -> str:

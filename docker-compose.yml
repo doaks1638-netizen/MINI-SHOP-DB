@@ -1,6 +1,7 @@
 services:
   web:
     restart: unless-stopped
+    env_file: .env
     build:
       context: .
       dockerfile: ./backend/Dockerfile # билд зависимостей 
