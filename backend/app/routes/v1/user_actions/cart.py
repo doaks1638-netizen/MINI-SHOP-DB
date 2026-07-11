@@ -3,7 +3,7 @@ from sqlalchemy import select, case
 from sqlalchemy.dialects.postgresql import insert
 from app.models import CartItem, Product, User
 from app.schemas import CartItemDTO, CartItemWithStatus, CartItemStatus
-from backend.app.db.database import DBsession
+from app.db.database import DBsession
 from app.services import check_user_product_exists
 from typing import Annotated
 from uuid import UUID

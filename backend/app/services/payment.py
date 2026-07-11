@@ -1,6 +1,6 @@
 from yookassa import Configuration, Payment
 from decimal import Decimal
-from backend.app.core.settings import settings
+from app.core.settings import settings
 from anyio import to_thread
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select

@@ -1,5 +1,5 @@
 from pathlib import Path
-from backend.app.core.settings import settings
+from app.core.settings import settings
 from fastapi import UploadFile, HTTPException
 from uuid import uuid4
 

@@ -4,9 +4,9 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from typing import Annotated
 from app.models import User
-from backend.app.db.database import DBsession
+from app.db.database import DBsession
 from app.models.enums import UserRole
-from backend.app.core.settings import settings
+from app.core.settings import settings
 import jwt
 
 page_number = Annotated[int, Query(gt=0)]

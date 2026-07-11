@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from app.models import Category, Product
-from backend.app.db.database import DBsession
+from app.db.database import DBsession
 from app.schemas import ProductCreate, ProductPatch, ProductDTO
 from sqlalchemy import select, and_, insert, update, or_, desc, func
 from uuid import UUID

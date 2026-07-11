@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
 from app.models import Order, User
-from backend.app.db.database import DBsession
+from app.db.database import DBsession
 from sqlalchemy import select, update, desc
 from sqlalchemy.orm import selectinload
 from app.models.enums import OrderStatus

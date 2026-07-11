@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from app.models import Category, Product
-from backend.app.db.database import DBsession
+from app.db.database import DBsession
 from app.routes import page_number
 from app.schemas import ProductDTO, ProductRelDTO
 from sqlalchemy import select, func

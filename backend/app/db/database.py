@@ -1,4 +1,4 @@
-from backend.app.core.settings import settings
+from app.core.settings import settings
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from fastapi import Depends
 from typing import Annotated, AsyncGenerator

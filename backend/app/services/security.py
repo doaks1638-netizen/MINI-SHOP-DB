@@ -1,5 +1,5 @@
 from pwdlib import PasswordHash
-from backend.app.core.settings import settings
+from app.core.settings import settings
 from app.routes import exc, expired_exc
 from datetime import datetime, timezone
 import jwt

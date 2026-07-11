@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Depends
 from sqlalchemy import select, func
 from app.models import CartItem, Product, User
 from app.schemas import AdminCart, AdminCartItemDTO
-from backend.app.db.database import DBsession
+from app.db.database import DBsession
 from app.services import check_user_product_exists, update_amount
 from typing import Annotated
 from uuid import UUID

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Body, Depends, Query
 from sqlalchemy import select, insert
 from app.models import Category
-from backend.app.db.database import DBsession
+from app.db.database import DBsession
 from app.schemas import CategoryDTO, CategoryCreate
 from typing import Annotated
 from uuid import UUID

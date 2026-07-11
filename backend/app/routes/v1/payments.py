@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, HTTPException, BackgroundTasks
 import ipaddress
-from backend.app.db.database import SessionLocal
+from app.db.database import SessionLocal
 from json import JSONDecodeError
 from yookassa.domain.notification import WebhookNotification
 from sqlalchemy import select

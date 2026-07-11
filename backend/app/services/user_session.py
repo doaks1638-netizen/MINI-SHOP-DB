@@ -1,6 +1,6 @@
 from sqlalchemy import select, func
 from app.models import UserSession
-from backend.app.core.settings import settings
+from app.core.settings import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

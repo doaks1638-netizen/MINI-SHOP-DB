@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.models import User, Payment
-from backend.app.db.database import DBsession
+from app.db.database import DBsession
 from app.schemas import (
     UserPatch,
     UserDTO,

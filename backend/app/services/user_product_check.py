@@ -1,7 +1,7 @@
 from sqlalchemy.sql import select
 from fastapi import HTTPException
 from app.models import CartItem, Product, User
-from backend.app.db.database import DBsession
+from app.db.database import DBsession
 from uuid import UUID
 
 

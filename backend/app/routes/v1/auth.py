@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from app.models import User, UserSession
-from backend.app.db.database import DBsession
+from app.db.database import DBsession
 from app.routes import (
     exc,
 )
@@ -17,10 +17,10 @@ from sqlalchemy import select
 from uuid import UUID
 from uuid6 import uuid7
 from datetime import datetime, timezone
-from backend.app.core.settings import settings
+from app.core.settings import settings
 from typing import Annotated
 from fastapi_sso import GoogleSSO
-from backend.app.core.settings import settings
+from app.core.settings import settings
 from fastapi.responses import RedirectResponse
 
 auth_router = APIRouter(prefix="/auth", tags=["AUTHENTICATION"])

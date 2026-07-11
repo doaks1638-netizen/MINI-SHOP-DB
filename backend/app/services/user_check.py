@@ -1,5 +1,5 @@
 from app.models import User
-from backend.app.db.database import DBsession
+from app.db.database import DBsession
 from uuid import UUID
 from fastapi import HTTPException, Depends
 from typing import Annotated
