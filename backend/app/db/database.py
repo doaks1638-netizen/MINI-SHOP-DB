@@ -5,7 +5,7 @@ from typing import Annotated, AsyncGenerator
 
 engine = create_async_engine(
     url=settings.get_db_url(),
-    echo=settings.db.DEBUG,
+    echo=settings.DEBUG,
     pool_size=10,
     max_overflow=20,
 )

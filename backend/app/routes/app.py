@@ -19,4 +19,4 @@ app.add_middleware(
 
 app.include_router(v1_router)
 
-app.mount("/media", StaticFiles(directory=str(settings.jwt.BASE_DIR / "media")), name="media")
+app.mount("/media", StaticFiles(directory=str(settings.BASE_DIR / "media")), name="media")

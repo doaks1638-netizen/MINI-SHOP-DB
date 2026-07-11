@@ -3,7 +3,7 @@ from app.core.settings import settings
 from fastapi import UploadFile, HTTPException
 from uuid import uuid4
 
-MEDIA_PRODUCTS_DIR = settings.jwt.BASE_DIR / "media" / "products"
+MEDIA_PRODUCTS_DIR = settings.BASE_DIR / "media" / "products"
 MEDIA_PRODUCTS_DIR.mkdir(exist_ok=True, parents=True)
 ALLOWED_PRODUCT_MIME_TYPES = {"image/jpeg", "image/png", "image/webp"}
 MAX_IMAGE_SIZE = 10 * 1024 * 1024
@@ -31,6 +31,6 @@ def remove_product_image(url: str | None) -> None:
     if not url:
         return
 
-    file_path = settings.jwt.BASE_DIR / (url.lstrip("/"))
+    file_path = settings.BASE_DIR / (url.lstrip("/"))
 
     file_path.unlink(missing_ok=True)

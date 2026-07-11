@@ -28,7 +28,7 @@ google_router = APIRouter(prefix="/google", tags=["GOOGLE"])
 
 
 async def get_google_sso():
-    sso = GoogleSSO(settings.jwt.CLIENT_ID, settings.jwt.CLIENT_SECRET, settings.jwt.REDIRECT_URL)
+    sso = GoogleSSO(settings.JWT__CLIENT_ID, settings.JWT__CLIENT_SECRET, settings.JWT__REDIRECT_URL)
     async with sso:
         yield sso
 
@@ -77,7 +77,7 @@ async def google_callback(
     new_session = UserSession(
         user_id=current_user.id,
         active_token_id=token_id,
-        expiration_time=datetime.now(timezone.utc) + settings.jwt.REFRESH_TOKEN_TIME,
+        expiration_time=datetime.now(timezone.utc) + settings.JWT__REFRESH_TOKEN_TIME,
     )
     db.add(new_session)
 
@@ -133,7 +133,7 @@ async def refresh_tokens(db: DBsession, refresh_token: RefreshToken):
 
     new_token_id = uuid7()
 
-    session.expiration_time = datetime.now(timezone.utc) + settings.jwt.REFRESH_TOKEN_TIME
+    session.expiration_time = datetime.now(timezone.utc) + settings.JWT__REFRESH_TOKEN_TIME
     session.active_token_id = new_token_id
 
     refresh_data = {
