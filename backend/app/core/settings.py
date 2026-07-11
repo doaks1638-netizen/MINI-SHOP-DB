@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     YOOKASSA_RETURN_URL: str
 
     # Computed
-    BASE_DIR: Path = Path(__file__).parent.parent
+    BASE_DIR: Path = Path(__file__).parent.parent.parent
 
     model_config = SettingsConfigDict(
         extra="ignore",
