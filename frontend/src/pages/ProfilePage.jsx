@@ -15,6 +15,7 @@ export default function ProfilePage() {
   const [picture, setPicture] = useState(user?.picture || '');
   const [topUpAmount, setTopUpAmount] = useState('');
   const [topUpLoading, setTopUpLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleSave = async () => {
     try {
@@ -23,7 +24,12 @@ export default function ProfilePage() {
       toast.success('Профиль обновлён');
       setEditing(false);
     } catch (err) {
-      toast.error(err.message);
+      if (err.name === 'ApiError' && Object.keys(err.fields).length > 0) {
+        setFieldErrors(err.fields);
+        toast.error('Проверьте правильность заполнения полей');
+      } else {
+        toast.error(err.message);
+      }
     }
   };
 
@@ -46,7 +52,12 @@ export default function ProfilePage() {
         setTopUpLoading(false);
       }
     } catch (err) {
-      toast.error(err.message);
+      if (err.name === 'ApiError' && err.fields.update_amount) {
+        setFieldErrors({ ...fieldErrors, update_amount: err.fields.update_amount });
+        toast.error('Некорректная сумма пополнения');
+      } else {
+        toast.error(err.message);
+      }
       setTopUpLoading(false);
     }
   };
@@ -89,8 +100,14 @@ export default function ProfilePage() {
             <div className="profile-avatar-info">
               {editing ? (
                 <div className="profile-edit-fields">
-                  <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Имя" />
-                  <input className="input" value={picture} onChange={(e) => setPicture(e.target.value)} placeholder="URL фото" />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <input className={`input ${fieldErrors.name ? 'input-error' : ''}`} value={name} onChange={(e) => { setName(e.target.value); setFieldErrors({ ...fieldErrors, name: undefined }); }} placeholder="Имя" />
+                    {fieldErrors.name && <span className="field-error">{fieldErrors.name}</span>}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <input className={`input ${fieldErrors.picture ? 'input-error' : ''}`} value={picture} onChange={(e) => { setPicture(e.target.value); setFieldErrors({ ...fieldErrors, picture: undefined }); }} placeholder="URL фото" />
+                    {fieldErrors.picture && <span className="field-error">{fieldErrors.picture}</span>}
+                  </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn btn-primary btn-sm" onClick={handleSave}>Сохранить</button>
                     <button className="btn btn-ghost btn-sm" onClick={() => setEditing(false)}>Отмена</button>
@@ -151,25 +168,29 @@ export default function ProfilePage() {
                 </button>
               ))}
             </div>
-            <div className="topup-input-group">
-              <input
-                type="number"
-                className="input"
-                placeholder="Введите сумму"
-                value={topUpAmount}
-                onChange={(e) => setTopUpAmount(e.target.value)}
-                min="0"
-                step="0.01"
-                id="topup-input"
-              />
-              <button
-                className="btn btn-primary"
-                onClick={handleTopUp}
-                disabled={topUpLoading}
-                id="topup-btn"
-              >
-                {topUpLoading ? 'Пополнение...' : 'Пополнить'}
-              </button>
+            <div className="topup-input-group" style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  type="number"
+                  className={`input ${fieldErrors.update_amount ? 'input-error' : ''}`}
+                  placeholder="Введите сумму"
+                  value={topUpAmount}
+                  onChange={(e) => { setTopUpAmount(e.target.value); setFieldErrors({ ...fieldErrors, update_amount: undefined }); }}
+                  min="0"
+                  step="0.01"
+                  id="topup-input"
+                  style={{ flex: 1 }}
+                />
+                <button
+                  className="btn btn-primary"
+                  onClick={handleTopUp}
+                  disabled={topUpLoading}
+                  id="topup-btn"
+                >
+                  {topUpLoading ? 'Пополнение...' : 'Пополнить'}
+                </button>
+              </div>
+              {fieldErrors.update_amount && <span className="field-error">{fieldErrors.update_amount}</span>}
             </div>
           </div>
         </div>

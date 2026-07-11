@@ -19,6 +19,7 @@ export default function AdminProducts() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [form, setForm] = useState({ category_id: '', name: '', description: '', price: '', now_amount: '', is_active: true, picture_file: null });
+  const [fieldErrors, setFieldErrors] = useState({});
   const toast = useToast();
 
   const fetchProducts = useCallback(async () => {
@@ -61,6 +62,7 @@ export default function AdminProducts() {
   const openCreate = () => {
     setEditingProduct(null);
     setForm({ category_id: categories[0]?.id || '', name: '', description: '', price: '', now_amount: '', is_active: true, picture_file: null });
+    setFieldErrors({});
     setModalOpen(true);
   };
 
@@ -75,6 +77,7 @@ export default function AdminProducts() {
       is_active: product.is_active ?? true,
       picture_file: null,
     });
+    setFieldErrors({});
     setModalOpen(true);
   };
 
@@ -101,7 +104,12 @@ export default function AdminProducts() {
       setModalOpen(false);
       fetchProducts();
     } catch (err) {
-      toast.error(err.message);
+      if (err.name === 'ApiError' && Object.keys(err.fields).length > 0) {
+        setFieldErrors(err.fields);
+        toast.error('Проверьте правильность заполнения полей');
+      } else {
+        toast.error(err.message);
+      }
     }
   };
 
@@ -223,37 +231,43 @@ export default function AdminProducts() {
         <div className="admin-form">
           <div className="input-group">
             <label className="input-label">Категория</label>
-            <select className="input" value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })}>
+            <select className={`input ${fieldErrors.category_id ? 'input-error' : ''}`} value={form.category_id} onChange={e => { setForm({ ...form, category_id: e.target.value }); setFieldErrors({ ...fieldErrors, category_id: undefined }); }}>
               <option value="">Выберите категорию</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
+            {fieldErrors.category_id && <span className="field-error">{fieldErrors.category_id}</span>}
           </div>
           <div className="input-group">
             <label className="input-label">Название</label>
-            <input className="input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Название товара" />
+            <input className={`input ${fieldErrors.name ? 'input-error' : ''}`} value={form.name} onChange={e => { setForm({ ...form, name: e.target.value }); setFieldErrors({ ...fieldErrors, name: undefined }); }} placeholder="Название товара" />
+            {fieldErrors.name && <span className="field-error">{fieldErrors.name}</span>}
           </div>
           <div className="input-group">
             <label className="input-label">Описание</label>
-            <input className="input" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Описание (опционально)" />
+            <input className={`input ${fieldErrors.description ? 'input-error' : ''}`} value={form.description} onChange={e => { setForm({ ...form, description: e.target.value }); setFieldErrors({ ...fieldErrors, description: undefined }); }} placeholder="Описание (опционально)" />
+            {fieldErrors.description && <span className="field-error">{fieldErrors.description}</span>}
           </div>
           <div className="admin-form-row">
             <div className="input-group">
               <label className="input-label">Цена (₽)</label>
-              <input className="input" type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="0.00" min="0" step="0.01" />
+              <input className={`input ${fieldErrors.price ? 'input-error' : ''}`} type="number" value={form.price} onChange={e => { setForm({ ...form, price: e.target.value }); setFieldErrors({ ...fieldErrors, price: undefined }); }} placeholder="0.00" min="0" step="0.01" />
+              {fieldErrors.price && <span className="field-error">{fieldErrors.price}</span>}
             </div>
             <div className="input-group">
               <label className="input-label">Количество</label>
-              <input className="input" type="number" value={form.now_amount} onChange={e => setForm({ ...form, now_amount: e.target.value })} placeholder="0" min="0" />
+              <input className={`input ${fieldErrors.now_amount ? 'input-error' : ''}`} type="number" value={form.now_amount} onChange={e => { setForm({ ...form, now_amount: e.target.value }); setFieldErrors({ ...fieldErrors, now_amount: undefined }); }} placeholder="0" min="0" />
+              {fieldErrors.now_amount && <span className="field-error">{fieldErrors.now_amount}</span>}
             </div>
           </div>
           <div className="input-group" style={{ marginTop: '1rem' }}>
             <label className="input-label">Изображение товара</label>
             <input 
               type="file" 
-              className="input" 
+              className={`input ${fieldErrors.picture_file ? 'input-error' : ''}`} 
               accept="image/png, image/jpeg, image/webp" 
-              onChange={e => setForm({ ...form, picture_file: e.target.files[0] })} 
+              onChange={e => { setForm({ ...form, picture_file: e.target.files[0] }); setFieldErrors({ ...fieldErrors, picture_file: undefined }); }} 
             />
+            {fieldErrors.picture_file && <span className="field-error">{fieldErrors.picture_file}</span>}
             {editingProduct?.image_url && !form.picture_file && (
               <div style={{ marginTop: '8px' }}>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '4px' }}>Текущее изображение:</p>

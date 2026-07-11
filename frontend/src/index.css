@@ -357,6 +357,18 @@ img {
   color: var(--text-secondary);
 }
 
+.input-error {
+  border-color: var(--accent-red) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+.field-error {
+  color: var(--accent-red);
+  font-size: var(--font-xs);
+  margin-top: var(--space-xs);
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
 /* --- Cards --- */
 .card {
   background: var(--glass-bg);

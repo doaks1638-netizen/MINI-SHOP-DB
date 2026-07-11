@@ -15,6 +15,7 @@ export default function AdminCategories() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCat, setEditingCat] = useState(null);
   const [name, setName] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const toast = useToast();
 
   const fetchCategories = useCallback(async () => {
@@ -38,8 +39,8 @@ export default function AdminCategories() {
     return () => clearTimeout(timer);
   }, [fetchCategories]);
 
-  const openCreate = () => { setEditingCat(null); setName(''); setModalOpen(true); };
-  const openEdit = (cat) => { setEditingCat(cat); setName(cat.name); setModalOpen(true); };
+  const openCreate = () => { setEditingCat(null); setName(''); setFieldErrors({}); setModalOpen(true); };
+  const openEdit = (cat) => { setEditingCat(cat); setName(cat.name); setFieldErrors({}); setModalOpen(true); };
 
   const handleSubmit = async () => {
     try {
@@ -53,7 +54,12 @@ export default function AdminCategories() {
       setModalOpen(false);
       fetchCategories();
     } catch (err) {
-      toast.error(err.message);
+      if (err.name === 'ApiError' && Object.keys(err.fields).length > 0) {
+        setFieldErrors(err.fields);
+        toast.error('Проверьте правильность заполнения полей');
+      } else {
+        toast.error(err.message);
+      }
     }
   };
 
@@ -129,7 +135,8 @@ export default function AdminCategories() {
         <div className="admin-form">
           <div className="input-group">
             <label className="input-label">Название категории</label>
-            <input className="input" value={name} onChange={e => setName(e.target.value)} placeholder="Введите название" maxLength={50} />
+            <input className={`input ${fieldErrors.name ? 'input-error' : ''}`} value={name} onChange={e => { setName(e.target.value); setFieldErrors({ ...fieldErrors, name: undefined }); }} placeholder="Введите название" maxLength={50} />
+            {fieldErrors.name && <span className="field-error">{fieldErrors.name}</span>}
           </div>
           <div className="modal-actions">
             <button className="btn btn-ghost" onClick={() => setModalOpen(false)}>Отмена</button>

@@ -55,6 +55,15 @@ async function refreshTokens() {
   }
 }
 
+export class ApiError extends Error {
+  constructor(message, status, fields = {}) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.fields = fields;
+  }
+}
+
 async function apiRequest(endpoint, options = {}) {
   const { access } = getTokens();
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
@@ -91,16 +100,25 @@ async function apiRequest(endpoint, options = {}) {
   if (!res.ok) {
     const error = await res.json().catch(() => ({ detail: 'Request failed' }));
     let msg = `HTTP ${res.status}`;
+    let fields = {};
+
     if (error && typeof error === 'object') {
       if (Array.isArray(error.detail)) {
-        msg = error.detail.map(e => e.msg || JSON.stringify(e)).join(', ');
+        // Typical Pydantic/FastAPI validation error format
+        msg = 'Ошибка валидации полей';
+        error.detail.forEach(e => {
+          if (e.loc && e.loc.length > 0) {
+            const field = e.loc[e.loc.length - 1]; // get the last element of loc (the field name)
+            fields[field] = e.msg;
+          }
+        });
       } else if (error.detail) {
         msg = String(error.detail);
       } else if (error.message) {
         msg = String(error.message);
       }
     }
-    throw new Error(msg);
+    throw new ApiError(msg, res.status, fields);
   }
 
   return res.json();
