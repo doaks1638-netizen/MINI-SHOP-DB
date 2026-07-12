@@ -12,11 +12,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # НАШ НОВЫЙ ШАГ: Создаем пустой файл-пустышку, чтобы Dockerfile не падал
-      - name: Create dummy .env.test
-        run: touch .env.test
+      # ЗАМЕНЯЕМ ПРОШЛЫЙ ШАГ НА ЭТОТ:
+      # Наполняем тестовый .env, чтобы его прочитал и docker compose, и само приложение
+      name: Create env files for testing
+      run: |
+        echo "DB_USER=test_user" >> .env
+        echo "DB_PASS=test_password" >> .env
+        echo "DB_NAME=test_db" >> .env
+        echo "DB_HOST=test_db" >> .env
+        cp .env .env.test # Дублируем для Dockerfile.test
 
-      # Этот шаг остался без изменений
+      # Этот шаг остается без изменений
       - name: Run Tests in Docker
         run: |
           docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
