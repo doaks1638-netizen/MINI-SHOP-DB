@@ -12,6 +12,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # НАШ НОВЫЙ ШАГ: Создаем пустой файл-пустышку, чтобы Dockerfile не падал
+      - name: Create dummy .env.test
+        run: touch .env.test
+
+      # Этот шаг остался без изменений
       - name: Run Tests in Docker
         run: |
           docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
