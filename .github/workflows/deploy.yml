@@ -12,17 +12,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ЗАМЕНЯЕМ ПРОШЛЫЙ ШАГ НА ЭТОТ:
-      # Наполняем тестовый .env, чтобы его прочитал и docker compose, и само приложение
-      name: Create env files for testing
-      run: |
-        echo "DB_USER=test_user" >> .env
-        echo "DB_PASS=test_password" >> .env
-        echo "DB_NAME=test_db" >> .env
-        echo "DB_HOST=test_db" >> .env
-        cp .env .env.test # Дублируем для Dockerfile.test
+      # Теперь дефис на месте, гитхаб поймет, что это новый шаг
+      - name: Create env files for testing
+        run: |
+          echo "DB_USER=test_user" >> .env
+          echo "DB_PASS=test_password" >> .env
+          echo "DB_NAME=test_db" >> .env
+          echo "DB_HOST=test_db" >> .env
+          cp .env .env.test
 
-      # Этот шаг остается без изменений
       - name: Run Tests in Docker
         run: |
           docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
@@ -41,14 +39,12 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.SERVER_USER }} # Сюда подставится alex
+          username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Переходим в твою домашнюю папку проекта
             mkdir -p /home/alex/MINI_SHOP_DB
             cd /home/alex/MINI_SHOP_DB
             
-            # Клонируем или обновляем репо
             if [ ! -d ".git" ]; then
               git clone https://github.com/${{ github.repository }}.git .
             fi
@@ -57,5 +53,4 @@ jobs:
             git checkout main
             git pull origin main
             
-            # Перезапускаем продакшн
             docker compose up --build -d
