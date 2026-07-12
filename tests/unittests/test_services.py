@@ -1,5 +1,5 @@
 from app.services.security import create_tokens, decode_refresh_token
-from app.settings import settings
+from app.core.settings import settings
 import pytest
 from unittest.mock import MagicMock
 import jwt
@@ -27,11 +27,11 @@ class TestJWT:
         payload = jwt.decode(
             rez["refresh_token"],
             settings.JWT_SECRET_KEY,
-            algorithms=[settings.ALGORITHM],
+            algorithms=[settings.JWT_ALGORITHM],
         )
         payload["exp"] = datetime(1, 1, 1)
         token = jwt.encode(
-            payload, key=settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM
+            payload, key=settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
         )
         refresh_token = MagicMock()
         refresh_token.token = token

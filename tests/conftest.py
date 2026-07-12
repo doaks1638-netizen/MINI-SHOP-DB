@@ -1,8 +1,8 @@
 from app.routes.app import app
-from app.database import get_db
+from app.db.database import get_db
 from app.models import User, UserSession
 from app.services.security import create_tokens
-from app.settings import settings
+from app.core.settings import settings
 from app.models.enums import UserRole
 from app.models import Product, Category
 import pytest
@@ -43,7 +43,7 @@ async def auth_client(db):
         id=session_id,
         user_id=id,
         active_token_id=token_id,
-        expiration_time=datetime.now(timezone.utc) + settings.REFRESH_TOKEN_TIME,
+        expiration_time=datetime.now(timezone.utc) + settings.JWT_REFRESH_TOKEN_TIME,
     )
     db.add(client)
     db.add(session)
@@ -84,7 +84,7 @@ async def auth_admin(db):
         id=session_id,
         user_id=id,
         active_token_id=token_id,
-        expiration_time=datetime.now(timezone.utc) + settings.REFRESH_TOKEN_TIME,
+        expiration_time=datetime.now(timezone.utc) + settings.JWT_REFRESH_TOKEN_TIME,
     )
     db.add(client)
     db.add(session)
