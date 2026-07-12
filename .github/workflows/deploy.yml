@@ -37,6 +37,10 @@ jobs:
               mkdir -p /home/alex/MINI_SHOP_DB
               cd /home/alex/MINI_SHOP_DB
               
+              # Stop and remove old/conflicting containers before pulling new code
+              docker compose down || true
+              docker rm -f vite_frontend postgres_db pgadmin_ui || true
+              
               if [ ! -d ".git" ]; then
                 git clone https://github.com/${{ github.repository }}.git .
               fi
