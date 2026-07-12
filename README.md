@@ -75,18 +75,15 @@ MINI-SHOP-DB/
 ## For Developers
 
 - After modifying the code, you can run the tests using this command:
-- !!! INFO I strongly advise against altering the logic or adding volumes for the test data; instead, use the `-v` flag and avoid errors related to database creation and deletion.
+- !!! INFO I strongly advise against altering the logic or adding volumes for the test data; instead, use the `-v` flag to avoid errors related to database creation and deletion.
+
+Testing uses the `.env.test` file which is checked into the repository with dummy data.
 
 ```bash
-mv .env.test.example .env.test
-vim .env
+sudo docker compose --env-file .env.test -f docker-compose.test.yml up --build --abort-on-container-exit; sudo docker compose -f docker-compose.test.yml down -v
 ```
 
-```bash
-sudo docker compose --env-file .env.test -f docker-compose.test.yaml up --build --abort-on-container-exit; sudo docker compose -f docker-compose.test.yaml down -v
-```
-
-- To change the test execution parameters, modify `docker-compose.test.yaml` -> `web` -> `command`:
+- To change the test execution parameters, modify `docker-compose.test.yml` -> `web` -> `command`:
 
 ## License
 

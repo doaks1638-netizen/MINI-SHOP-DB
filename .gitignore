@@ -1,5 +1,5 @@
 *.env
-.env.test
+!.env.test
 docker.env
 test.md
 *__pycache__
