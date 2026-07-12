@@ -33,15 +33,17 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            mkdir -p /home/alex/MINI_SHOP_DB
-            cd /home/alex/MINI_SHOP_DB
-            
-            if [ ! -d ".git" ]; then
-              git clone https://github.com/${{ github.repository }}.git .
-            fi
-            
-            git fetch --all
-            git checkout main
-            git pull origin main
-            
-            docker compose up --build -d
+            bash -c '
+              mkdir -p /home/alex/MINI_SHOP_DB
+              cd /home/alex/MINI_SHOP_DB
+              
+              if [ ! -d ".git" ]; then
+                git clone https://github.com/${{ github.repository }}.git .
+              fi
+              
+              git fetch --all
+              git checkout main
+              git pull origin main
+              
+              docker compose up --build -d
+            '
