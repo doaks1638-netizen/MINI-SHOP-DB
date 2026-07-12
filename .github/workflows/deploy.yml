@@ -41,6 +41,20 @@ jobs:
               docker compose down || true
               docker rm -f vite_frontend postgres_db pgadmin_ui || true
               
+              # Stop any containers using ports 80 or 443 to avoid port conflicts
+              CONTAINERS_80=$(docker ps -aq --filter publish=80)
+              if [ -n "$CONTAINERS_80" ]; then
+                docker rm -f $CONTAINERS_80
+              fi
+              CONTAINERS_443=$(docker ps -aq --filter publish=443)
+              if [ -n "$CONTAINERS_443" ]; then
+                docker rm -f $CONTAINERS_443
+              fi
+              
+              # Stop system services if they are blocking ports 80/443
+              sudo systemctl stop nginx 2>/dev/null || true
+              sudo systemctl stop apache2 2>/dev/null || true
+              
               if [ ! -d ".git" ]; then
                 git clone https://github.com/${{ github.repository }}.git .
               fi
