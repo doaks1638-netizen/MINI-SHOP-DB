@@ -12,7 +12,6 @@ RUN uv sync --frozen --no-cache
 
 COPY backend/ /mini_shop_db/
 COPY .env.test /mini_shop_db/.env
-COPY tests/ /mini_shop_db/tests
 COPY pytest.ini /mini_shop_db/
 
 

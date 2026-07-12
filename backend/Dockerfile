@@ -12,7 +12,6 @@ COPY backend/pyproject.toml backend/uv.lock ./
 
 RUN uv sync --frozen --no-cache --no-dev
 
-COPY tests/ /mini_shop_db/
 COPY backend/ /mini_shop_db/
 
 ENTRYPOINT [ "./prestart.sh" ]
