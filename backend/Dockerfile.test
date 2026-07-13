@@ -12,7 +12,6 @@ FROM python:3.12.2-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PATH="/backend/.venv/bin:$PATH"
 
 WORKDIR /backend
 
