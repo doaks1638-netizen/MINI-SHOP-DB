@@ -13,11 +13,11 @@ services:
       watch:
         - action: sync
           path: ./backend/app
-          target: /mini_shop_db/app
+          target: /backend/app
 
         - action: sync
           path: ./backend/media
-          target: /mini_shop_db/media
+          target: /backend/media
 
         - action: rebuild
           path: .env

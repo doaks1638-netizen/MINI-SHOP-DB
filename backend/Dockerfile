@@ -1,19 +1,28 @@
-FROM python:3.12.2-bookworm
+FROM python:3.12.2-bookworm AS builder
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+WORKDIR /backend
 
-COPY .env /mini_shop_db/
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
-WORKDIR /mini_shop_db
 
 COPY backend/pyproject.toml backend/uv.lock ./
 
-RUN uv sync --frozen --no-cache --no-dev
+RUN uv sync --no-install-project
 
-COPY backend/ /mini_shop_db/
+FROM python:3.12.2-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PATH="/backend/.venv/bin:$PATH"
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+COPY .env /mini_shop_db/
+
+WORKDIR /backend
+
+COPY --from=builder /backend/.venv .venv 
+
+COPY backend/ ./
 
 ENTRYPOINT [ "./prestart.sh" ]
 
-# no CMD where. go to docker-compose.yaml -> web -> command: gunicorn...
