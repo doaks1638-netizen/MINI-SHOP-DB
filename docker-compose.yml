@@ -8,26 +8,13 @@ services:
     command: uv run gunicorn app.routes.app:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
     volumes:
       - media_data:/mini_shop_db/media
-    # не прокидываем порты, этим будет заниматься nginx
-    develop:
-      watch:
-        - action: sync
-          path: ./backend/app
-          target: /backend/app
-
-        - action: sync
-          path: ./backend/media
-          target: /backend/media
-
-        - action: rebuild
-          path: .env
-
-        - action: rebuild
-          path: ./backend/alembic
     depends_on:
       # старт только когда запустилась бд
       db:
         condition: service_healthy
+    networks:
+      - backend_net
+      - frontend_net
 
   frontend:
     image: node:22-slim
@@ -41,12 +28,8 @@ services:
       # Анонимный volume перекрывает хостовый node_modules —
       # контейнер установит свои нативные бинарники (esbuild, rollup и т.д.)
       - /mini_shop_db/frontend/node_modules
-    develop:
-      watch:
-        # Следим за изменениями фронта для hot-reload
-        - action: sync
-          path: ./frontend
-          target: /mini_shop_db/frontend
+    networks:
+      - frontend_net
 
   db:
     image: postgres:16.4
@@ -62,6 +45,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 3
+    networks:
+      - backend_net
 
   pgadmin:
     restart: unless-stopped
@@ -74,6 +59,9 @@ services:
       # старт только когда запустилась бд
       db:
         condition: service_healthy
+    networks:
+      - backend_net
+      - frontend_net
 
   nginx:
     image: jonasal/nginx-certbot:latest
@@ -93,8 +81,15 @@ services:
     depends_on:
       - web
       - frontend
+    networks:
+      - frontend_net
 volumes:
   pg_data:
   letsencrypt_data:
   media_data:
   dist:
+
+networks:
+  backend_net:
+  frontend_net:
+
