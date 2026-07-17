@@ -1,5 +1,5 @@
 from app.routes.app import app
-from app.routes.v1.auth import get_google_sso
+from backend.app.routes.v1.auth.auth import get_google_sso
 from unittest.mock import MagicMock
 from uuid6 import uuid7
 import fastapi

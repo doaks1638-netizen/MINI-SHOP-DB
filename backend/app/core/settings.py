@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_TIME: timedelta = timedelta(hours=1)
+    JWT_TOKEN_URL_TIME: timedelta = timedelta(minutes=30)
+    JWT_TOKEN_CODE_TIME: timedelta = timedelta(minutes=10)
     JWT_REFRESH_TOKEN_TIME: timedelta = timedelta(days=30)
     JWT_MAX_USER_SESSION: int = 10
     JWT_CLIENT_SECRET: str
@@ -37,6 +39,7 @@ class Settings(BaseSettings):
     EMAIL_USERNAME: EmailStr
     EMAIL_PASSWORD: str
     EMAIL_FROM: EmailStr
+    EMAIL_CALLBACK:str
 
     # Computed
     BASE_DIR: Path = Path(__file__).parent.parent.parent

@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from app.models import CartItem, Product, User
 from app.db.database import DBsession
 from uuid import UUID
-
+from app.models.enums import UserStatus
 
 async def check_user_product_exists(db: DBsession, user_id: UUID, product_id: UUID):
     check = (
@@ -13,7 +13,7 @@ async def check_user_product_exists(db: DBsession, user_id: UUID, product_id: UU
         .where(
             CartItem.user_id == user_id,
             CartItem.product_id == product_id,
-            User.is_active == True,
+            User.status == UserStatus.active,
             Product.is_active == True,
         )
         .with_for_update(

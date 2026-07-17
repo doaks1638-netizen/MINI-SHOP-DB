@@ -5,7 +5,7 @@ from app.schemas import UserPatch, AdminUserDTO, AdminUserDTOCount, AdminOrderDT
 from sqlalchemy import select, func
 from app.routes import get_current_admin, page_number
 from app.services import user_depends
-from app.models.enums import UserRole
+from app.models.enums import UserRole, UserStatus
 from typing import Annotated
 
 admin_user_router = APIRouter(
@@ -24,10 +24,10 @@ async def get_users(
             User.id,
             User.name,
             func.count(Order.id).label("orders_count"),
-            User.is_active.label("is_user_active"),
+            User.status.label("user_status"),
         )
         .outerjoin(Order)
-        .group_by(User.id, User.name, User.is_active)
+        .group_by(User.id, User.name, User.status)
     )
 
     if roles:
@@ -57,7 +57,7 @@ async def change_user_profile(
 
 @admin_user_router.delete("/{user_id}", status_code=204)
 async def delete_user(db: DBsession, user: user_depends):
-    user.is_active = False
+    user.status = UserStatus.deleted
     await db.commit()
 
 
@@ -70,7 +70,7 @@ async def get_user_orders(db: DBsession, user: user_depends, page: page_number =
             Order.id,
             Order.status,
             Order.created_at,
-            User.is_active.label("is_user_active"),
+            User.status.label("user_status"),
         )
         .join(User, User.id == user.id)
         .where(Order.user_id == user.id)

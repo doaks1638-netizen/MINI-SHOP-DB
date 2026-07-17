@@ -9,6 +9,7 @@ from app.schemas import (
 from typing import Annotated
 from app.routes import get_current_user
 from app.services import create_yookaassa_payment
+from app.models.enums import UserStatus
 
 user_router = APIRouter(prefix="/users", tags=["USERS"])
 
@@ -34,7 +35,7 @@ async def change_my_profile(
 
 @user_router.delete("/me", status_code=204)
 async def delete_user(db: DBsession, user: Annotated[User, Depends(get_current_user)]):
-    user.is_active = False
+    user.status = UserStatus.deleted
     await db.commit()
 
 

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from uuid import UUID
-from app.models.enums import OrderStatus
+from app.models.enums import OrderStatus, UserStatus
 from datetime import datetime
 from app.schemas.shared import ProductShare
 
@@ -18,7 +18,7 @@ class OrderDTO(OrderCreate):
 
 
 class AdminOrderDTO(OrderDTO):
-    is_user_active: bool
+    user_status: UserStatus
 
 
 class OrderStatusEdit(BaseModel):
