@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 from datetime import timedelta
+from pydantic import EmailStr
 
 # path to .env file — works both in Docker (/mini_shop_db/) and local dev (project root)
 _here = Path(__file__).parent.parent  # app/
@@ -31,6 +32,11 @@ class Settings(BaseSettings):
     YOOKASSA_SHOP_ID: int
     YOOKASSA_SECRET_KEY: str
     YOOKASSA_RETURN_URL: str
+
+    #Email
+    EMAIL_USERNAME: EmailStr
+    EMAIL_PASSWORD: str
+    EMAIL_FROM: EmailStr
 
     # Computed
     BASE_DIR: Path = Path(__file__).parent.parent.parent
