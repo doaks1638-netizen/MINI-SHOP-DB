@@ -26,9 +26,12 @@ from .user import (
     NewBalance,
     AdminUserDTOCount,
     AdminUserDTO,
+    UserCreateEmail,
+    UserEmail,
 )
 from .shared import ProductShare
 from .tokens import TokenResponse, RefreshToken
+from .email import EmailSchema
 
 __all__ = [
     "Cart",
@@ -63,4 +66,7 @@ __all__ = [
     "AdminCart",
     "AdminCartItemDTO",
     "AdminCategoryDTO",
+    "EmailSchema",
+    "UserCreateEmail",
+    "UserEmail",
 ]

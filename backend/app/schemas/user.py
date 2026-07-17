@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field, EmailStr
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
-from app.models.enums import UserRole, CreatorUserRole
+from app.models.enums import UserRole, CreatorUserRole, UserStatus
 
 
 class UserCreate(BaseModel):
@@ -11,6 +11,14 @@ class UserCreate(BaseModel):
     email: EmailStr
     picture: str
 
+class UserCreateEmail(BaseModel):
+    name: Annotated[str, Field(max_length=256)]
+    email: EmailStr
+    password: Annotated[str, Field(max_length=25)]
+
+class UserEmail(BaseModel):
+    email: EmailStr
+    password: Annotated[str, Field(max_length=256)]
 
 class UserDTO(BaseModel):
     id: UUID
@@ -23,7 +31,7 @@ class UserDTO(BaseModel):
 
 
 class AdminUserDTO(UserDTO):
-    is_active: bool
+    status: UserStatus
 
 
 class UserDTOCount(BaseModel):
@@ -32,7 +40,7 @@ class UserDTOCount(BaseModel):
 
 
 class AdminUserDTOCount(UserDTOCount):
-    is_user_active: bool
+    user_status: UserStatus
 
 
 class UserPatch(BaseModel):

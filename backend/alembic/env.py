@@ -1,4 +1,5 @@
 from app.models import (
+    EmailCode,
     CartItem,
     Category,
     Order,

@@ -21,6 +21,7 @@ dependencies = [
     "yookassa>=3.10.1",
     "gunicorn>=26.0.0",
     "loguru>=0.7.3",
+    "fastapi-mail>=1.6.5",
 ]
 
 [dependency-groups]

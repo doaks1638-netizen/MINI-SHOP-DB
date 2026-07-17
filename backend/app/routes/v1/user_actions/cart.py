@@ -9,6 +9,7 @@ from typing import Annotated
 from uuid import UUID
 from app.routes import page_number
 from app.routes import get_current_user
+from app.models.enums import UserStatus
 
 cart_router = APIRouter(tags=["CART"], prefix="/cart")
 
@@ -35,7 +36,7 @@ async def get_user_cart(
         )
         .join(User, CartItem.user_id == User.id)
         .join(Product, CartItem.product_id == Product.id)
-        .where(User.is_active == True, Product.is_active == True)
+        .where(User.status == UserStatus.active, Product.is_active == True)
         .where(CartItem.user_id == user.id)
         .limit(30)
         .offset(30 * (page - 1))

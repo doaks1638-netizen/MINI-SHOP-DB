@@ -1,5 +1,6 @@
 from .cart_item import CartItem
 from .categories import Category
+from .email import EmailCode, EmailUrl
 from .order import Order
 from .product import Product
 from .session import UserSession
@@ -14,4 +15,6 @@ __all__ = [
     "Category",
     "CartItem",
     "Payment",
+    "EmailCode",
+    "EmailUrl",
 ]

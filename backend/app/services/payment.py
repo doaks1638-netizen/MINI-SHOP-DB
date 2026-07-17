@@ -7,7 +7,7 @@ from sqlalchemy import select
 from app.models import User
 from fastapi import HTTPException
 from uuid import UUID
-
+from app.models.enums import UserStatus
 
 async def create_yookaassa_payment(amount: Decimal, idempotency_key):
     Configuration.account_id = settings.YOOKASSA_SHOP_ID
@@ -37,7 +37,7 @@ async def debit_funds(db: AsyncSession, user_id: UUID, diff: Decimal):
     stmt = (
         select(User)
         .where(User.id == user_id)
-        .where(User.is_active == True)
+        .where(User.status == UserStatus.active)
         .with_for_update()
     )
     user = await db.scalar(stmt)

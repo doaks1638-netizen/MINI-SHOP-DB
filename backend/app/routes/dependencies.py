@@ -5,7 +5,7 @@ from sqlalchemy import select
 from typing import Annotated
 from app.models import User
 from app.db.database import DBsession
-from app.models.enums import UserRole
+from app.models.enums import UserRole, UserStatus
 from app.core.settings import settings
 import jwt
 
@@ -47,7 +47,7 @@ async def get_current_user(db: DBsession, token=Depends(oauth_scheme)):
         raise exc
 
     user = await db.scalar(
-        select(User).where(User.id == user_id, User.is_active == True)
+        select(User).where(User.id == user_id, User.status == UserStatus.active)
     )
     if not user:
         raise exc

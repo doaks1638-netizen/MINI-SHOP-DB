@@ -8,6 +8,14 @@ import jwt
 password_context = PasswordHash.recommended()
 
 
+def hash_password(password: str):
+    return password_context.hash(password)
+
+
+def verify_password(password: str, hash_password: str):
+    return password_context.verify(password, hash_password)
+
+
 def create_tokens(access_data: dict, refresh_data: dict):
     access_token_data = access_data.copy()
     refresh_token_data = refresh_data.copy()
@@ -27,7 +35,9 @@ def create_tokens(access_data: dict, refresh_data: dict):
 
     return {
         "access_token": jwt.encode(
-            access_token_data, key=settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+            access_token_data,
+            key=settings.JWT_SECRET_KEY,
+            algorithm=settings.JWT_ALGORITHM,
         ),
         "refresh_token": jwt.encode(
             refresh_token_data,

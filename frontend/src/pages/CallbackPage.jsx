@@ -1,20 +1,25 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Loader from '../components/Loader';
+import { API_BASE } from '../api/client';
 
 export default function CallbackPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   useEffect(() => {
-    // The Google callback returns tokens from the API
-    // The API endpoint /api/v1/auth/google/callback returns the tokens directly
-    // We need to handle the redirect flow:
-    // 1. Google redirects to our API callback
-    // 2. The API returns tokens in the response
-    // Since this is a server redirect, we need to check if tokens are in query params or hash
+    if (location.pathname === '/auth/callback') {
+      const token = searchParams.get('token');
+      if (token) {
+        window.location.href = `${API_BASE}/auth/url_callback?token=${token}`;
+      } else {
+        navigate('/login', { replace: true });
+      }
+      return;
+    }
 
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
@@ -23,10 +28,9 @@ export default function CallbackPage() {
       login(accessToken, refreshToken);
       navigate('/', { replace: true });
     } else {
-      // If no tokens in URL, redirect to login
       navigate('/login', { replace: true });
     }
-  }, [searchParams, login, navigate]);
+  }, [searchParams, login, navigate, location]);
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>

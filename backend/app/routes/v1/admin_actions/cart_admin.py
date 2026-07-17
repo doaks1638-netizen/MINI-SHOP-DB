@@ -21,12 +21,12 @@ async def get_all_carts(db: DBsession, page: page_number = 1):
             CartItem.user_id,
             func.count(CartItem.product_id).label("total_products"),
             func.sum(CartItem.amount).label("total_items"),
-            User.is_active.label("is_user_active"),
+            User.status.label("user_status"),
         )
         .select_from(CartItem)
         .join(User, CartItem.user_id == User.id)
         .join(Product, CartItem.product_id == Product.id)
-        .group_by(CartItem.user_id, User.is_active)
+        .group_by(CartItem.user_id, User.status)
         .limit(30)
         .offset(30 * (page - 1))
     )
@@ -38,7 +38,7 @@ async def get_all_carts(db: DBsession, page: page_number = 1):
 async def get_user_cart(db: DBsession, user_id: UUID, page: page_number = 1):
     query = (
         select(
-            CartItem.product_id, CartItem.amount, User.is_active.label("is_user_active")
+            CartItem.product_id, CartItem.amount, User.status.label("user_status")
         )
         .join(User, User.id == CartItem.user_id)
         .where(CartItem.user_id == user_id)

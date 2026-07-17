@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from uuid import UUID
 from typing import Annotated
 from enum import Enum
+from app.models.enums import UserStatus
 
 
 class CartItemStatus(str, Enum):
@@ -18,7 +19,7 @@ class Cart(
 
 
 class AdminCart(Cart):
-    is_user_active: bool
+    user_status: UserStatus
 
 
 class CartItemDTO(BaseModel):
@@ -28,7 +29,7 @@ class CartItemDTO(BaseModel):
 
 
 class AdminCartItemDTO(CartItemDTO):
-    is_user_active: bool
+    user_status: UserStatus
 
 
 class CartItemWithStatus(CartItemDTO):

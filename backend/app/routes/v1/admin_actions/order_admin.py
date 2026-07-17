@@ -30,7 +30,7 @@ async def get_all_orders(
         Order.id,
         Order.status,
         Order.created_at,
-        User.is_active.label("is_user_active"),
+        User.status.label("user_status"),
     ).join(User, User.id == Order.user_id)
 
     if status_filter:

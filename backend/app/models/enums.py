@@ -14,6 +14,10 @@ class UserRole(str, Enum):
     user = "user"
     creator = "creator"  # can change role admin
 
+class UserStatus(str, Enum):
+    active = 'active'
+    deleted = 'deleted'
+    pending = 'pending'
 
 class CreatorUserRole(str, Enum):
     admin = "admin"
