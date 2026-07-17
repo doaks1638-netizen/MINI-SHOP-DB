@@ -27,6 +27,7 @@ function AppRoutes() {
         !loading && isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />
       } />
       <Route path="/callback" element={<CallbackPage />} />
+      <Route path="/auth/callback" element={<CallbackPage />} />
 
       {/* Main layout — public + protected mixed */}
       <Route element={<Layout />}>
