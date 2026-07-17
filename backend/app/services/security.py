@@ -13,7 +13,7 @@ def hash_password(password: str):
 
 
 def verify_password(password: str, hash_password: str):
-    return password_context.verify(hash_password, hash)
+    return password_context.verify(password, hash_password)
 
 
 def create_tokens(access_data: dict, refresh_data: dict):

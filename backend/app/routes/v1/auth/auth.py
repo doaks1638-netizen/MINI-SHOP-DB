@@ -19,6 +19,7 @@ from app.services import (
     verify_password,
     send_url,
     send_code,
+    check_session_limit,
 )
 from sqlalchemy import select, delete
 from sqlalchemy.orm import selectinload
@@ -82,18 +83,18 @@ async def login(db: DBsession, user_info: UserEmail, background_tasks: Backgroun
     if (
         not (
             await asyncio.to_thread(
-                verify_password(user_info.password, same_user.password)
+                verify_password, user_info.password, same_user.password
             )
         )
         or same_user.status != UserStatus.active
     ):
         raise auth_exc
 
-    code = random.randrange(100000, 1000000)
+    code = str(random.randrange(100000, 1000000))
 
     new_callback = EmailCode(
         user_id=same_user.id,
-        expire_at=datetime.now(timezone.utc) + settings.JWT_TOKEN_URL_TIME,
+        expire_at=datetime.now(timezone.utc) + settings.JWT_TOKEN_CODE_TIME,
         code=code,
     )
     db.add(new_callback)
@@ -119,6 +120,7 @@ async def url_callback(db: DBsession, token: Annotated[str, Query(max_length=36)
     if datetime.now(timezone.utc) > email_url.expire_at:
         raise HTTPException(410, detail="Повторите регистрацию заново!")
     user = email_url.user
+    await check_session_limit(db=db, user_id=user.id)
     user.status = UserStatus.active
     await db.execute(delete(EmailUrl).where(EmailUrl.user_id == user.id))
     token_id = uuid7()
@@ -148,9 +150,7 @@ async def url_callback(db: DBsession, token: Annotated[str, Query(max_length=36)
 
 
 @auth_router.get("/code_callback", status_code=200, tags=["AUTHENTICATION"])
-async def code_callback(
-    db: DBsession, code: Annotated[int, Query(ge=100000, le=999999)]
-):
+async def code_callback(db: DBsession, code: Annotated[str, Query(max_length=6)]):
     stmt = (
         select(EmailCode)
         .where(EmailCode.code == code)
@@ -162,7 +162,8 @@ async def code_callback(
     if datetime.now(timezone.utc) > email_code.expire_at:
         raise HTTPException(410, detail="Повторите аунтификацию заново!")
     user = email_code.user
-    await db.execute(delete(EmailUrl).where(EmailUrl.id == email_code.id))
+    await check_session_limit(db=db, user_id=user.id)
+    await db.execute(delete(EmailCode).where(EmailCode.id == email_code.id))
     token_id = uuid7()
     new_session = UserSession(
         user_id=user.id,

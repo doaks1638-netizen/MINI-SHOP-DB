@@ -23,7 +23,6 @@ __all__ = [
     "create_order",
     "create_yookaassa_payment",
     "debit_funds",
-    "send_callback",
     "hash_password",
     "verify_password",
     "send_code",
