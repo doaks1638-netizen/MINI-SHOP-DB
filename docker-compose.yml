@@ -7,7 +7,7 @@ services:
       dockerfile: ./backend/Dockerfile # билд зависимостей 
     command: uv run gunicorn app.routes.app:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
     volumes:
-      - media_data:/mini_shop_db/media
+      - media_data:/backend/media
     depends_on:
       # старт только когда запустилась бд
       db:
