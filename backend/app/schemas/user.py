@@ -26,7 +26,7 @@ class UserDTO(BaseModel):
     email: EmailStr
     balance: Annotated[Decimal, Field(ge=0)]
     role: UserRole
-    picture: str
+    picture: str | None = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -45,7 +45,7 @@ class AdminUserDTOCount(UserDTOCount):
 
 class UserPatch(BaseModel):
     name: Annotated[str, Field(max_length=100)]
-    picture: str
+    picture: str | None = None
 
 
 class UserPatchRole(BaseModel):
