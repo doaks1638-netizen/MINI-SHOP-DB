@@ -1,6 +1,6 @@
 from app.models.base import Base, idpk
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.types import String
+from sqlalchemy.types import String, DateTime
 from sqlalchemy import ForeignKey
 from uuid import UUID
 from datetime import datetime
@@ -16,7 +16,7 @@ class EmailCode(Base):
 
     id: Mapped[idpk]
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    expire_at: Mapped[datetime]
+    expire_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     code: Mapped[str] = mapped_column(String(6))
 
     user: Mapped["User"] = relationship()
@@ -27,7 +27,7 @@ class EmailUrl(Base):
 
     id: Mapped[idpk]
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    expire_at: Mapped[datetime]
+    expire_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     token: Mapped[UUID]
     # I separate the token ID and id because I use UUID4 for the token and UUID6 for the database.
 
