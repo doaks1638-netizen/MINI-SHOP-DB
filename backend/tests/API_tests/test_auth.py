@@ -1,9 +1,7 @@
 from app.routes.app import app
-from backend.app.routes.v1.auth.auth import get_google_sso
+from app.routes.v1.auth.google_auth import get_google_sso
 from unittest.mock import MagicMock
 from uuid6 import uuid7
-import fastapi
-
 
 class TestAuth:
     """Authentication testing class, currently only Google, but in the future I'll add Github, X, and Telegram."""
