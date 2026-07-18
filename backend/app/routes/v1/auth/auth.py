@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
 import asyncio
 from app.models import User, UserSession, EmailUrl, EmailCode
 from app.db.database import DBsession
@@ -33,6 +33,7 @@ from fastapi import Query
 from app.models.enums import UserStatus
 import random
 from .google_auth import google_router
+from app.core.limiter import limiter
 
 auth_router = APIRouter(prefix="/auth", tags=["AUTHENTICATION"])
 auth_router.include_router(google_router)
@@ -40,8 +41,9 @@ auth_exc = HTTPException(401, detail="Неверные данные для вх�
 
 
 @auth_router.post("/registry", status_code=201, tags=["AUTHENTICATION"])
+@limiter.limit("25/day")
 async def registry(
-    db: DBsession, user_info: UserCreateEmail, background_tasks: BackgroundTasks
+    request: Request, db: DBsession, user_info: UserCreateEmail, background_tasks: BackgroundTasks
 ):
     same_user_stmt = select(User).where(User.email == user_info.email)
     same_user = await db.scalar(same_user_stmt)
@@ -75,7 +77,8 @@ async def registry(
 
 
 @auth_router.post("/login", status_code=201, tags=["AUTHENTICATION"])
-async def login(db: DBsession, user_info: UserEmail, background_tasks: BackgroundTasks):
+@limiter.limit("25/day")
+async def login(request: Request, db: DBsession, user_info: UserEmail, background_tasks: BackgroundTasks):
     same_user_stmt = select(User).where(User.email == user_info.email)
     same_user = await db.scalar(same_user_stmt)
     if not same_user:

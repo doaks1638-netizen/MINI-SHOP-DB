@@ -22,6 +22,7 @@ dependencies = [
     "gunicorn>=26.0.0",
     "loguru>=0.7.3",
     "fastapi-mail>=1.6.5",
+    "slowapi>=0.1.10",
 ]
 
 [dependency-groups]

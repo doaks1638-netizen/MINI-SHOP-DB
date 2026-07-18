@@ -13,6 +13,7 @@ from fastapi_sso import GoogleSSO
 from fastapi.responses import RedirectResponse
 from app.models.enums import UserStatus
 from app.models import User, UserSession
+from app.core.limiter import limiter
 
 google_router = APIRouter(prefix="/google", tags=["GOOGLE"])
 
@@ -26,7 +27,8 @@ async def get_google_sso():
 
 
 @google_router.get("/login")
-async def google_login(sso: Annotated[GoogleSSO, Depends(get_google_sso)]):
+@limiter.limit("100/day")
+async def google_login(request: Request, sso: Annotated[GoogleSSO, Depends(get_google_sso)]):
     return await sso.get_login_redirect()
 
 
